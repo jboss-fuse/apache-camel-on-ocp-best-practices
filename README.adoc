@@ -1,0 +1,42 @@
+= Camel on Openshift Best Practices
+:docinfo: shared
+:doctype: book
+:title: Camel on Openshift Best Practoces
+:toc: left
+:toclevels: 2
+:sectanchors:
+:sectlinks:
+:sectnums:
+
+toc::[]
+
+A curated list of documented best practices and examples to use Apache Camel on https://www.redhat.com/en/technologies/cloud-computing/openshift[**OpenShift**]. 
+
+This projecti is the source used to publish https://jboss-fuse.github.io/apache-camel-on-ocp-best-practices/ .
+
+== Contributing
+If you want to modify/fix an existing guide just open a pr against this repo, when merged to the `main` branch https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/blob/main/.github/workflows/publish.yml[a github action] should take care to publish it to githug pages committing the processed asciidoc file to https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/gh-pages[`gh-pages` branch].
+
+=== Building a local preview
+To build a local preview you need `asciidoc` installed. Then run:
+....
+make clean build
+....
+this will create a `localpreview/` folder containing the rendered html files. 
+
+If you have `xdg-open` installed (on linux it should be by default) you can open the preview in a browser directly with:
+....
+make open-preview
+....
+if you are on mac try `open ./localpreview/index.html`, otherwise simply open `./localpreview/index.html` in your browser of choice.
+
+=== Add a new guide
+Start from copying `template.adoc` file in `docs/` folder and rename it as needed. Link it into `docs/README.adoc` where appropriate, like:
+....
+[...]
+== New Guide Title
+
+=== xref:new-guide.adoc[My new guide!]
+[...]
+....
+If your guid needs examples or examples projects you can put them into `examples/` folder and reference them accordingly.

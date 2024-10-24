@@ -1,0 +1,21 @@
+= <Your Best Practice Title>
+:icons: font
+:numbered:
+:title: <Your Best Practice Title>
+:toc: left
+:toclevels: 2
+:source-highlighter: coderay
+
+== Context
+
+In this section, a brief explanation of the Best Practice context of applicability is provided.
+
+== Prerequisites 
+
+A list of prerequisite needed, if any.
+
+== Goal
+
+An overview of the Best Practice's aim.
+
+== <Other sections go here>

@@ -1,8 +1,8 @@
-name: GitHub Pages Publish
+name: Check pull requests
 
 on:
-  push:
-    branches: [ main ]
+  pull_request:
+    branches-ignore: [ gh-pages ]
 
 jobs:
   adoc_build:
@@ -27,9 +27,8 @@ jobs:
     - name: Print execution time
       run: echo "Time ${{ steps.adocbuild.outputs.time }}"
 
-    - name: Deploy docs to ghpages
-      uses: peaceiris/actions-gh-pages@v4
+    - name: Archive generated site
+      uses: actions/upload-artifact@v4
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_branch: gh-pages
-        publish_dir: ./public/
+        name: docs-preview
+        path: public/

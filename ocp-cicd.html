@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.23">
-<title>AWS Secrets Manager - Secrets Retrieval and Refresh with Apache Camel On OCP</title>
+<title>Camel on Openshift CI/CD</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -434,108 +434,25 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-/*! Stylesheet for CodeRay to loosely match GitHub themes | MIT License */
-pre.CodeRay{background:#f7f7f8}
-.CodeRay .line-numbers{border-right:1px solid;opacity:.35;padding:0 .5em 0 0;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
-.CodeRay span.line-numbers{display:inline-block;margin-right:.75em}
-.CodeRay .line-numbers strong{color:#000}
-table.CodeRay{border-collapse:separate;border:0;margin-bottom:0;background:none}
-table.CodeRay td{vertical-align:top;line-height:inherit}
-table.CodeRay td.line-numbers{text-align:right}
-table.CodeRay td.code{padding:0 0 0 .75em}
-.CodeRay .debug{color:#fff!important;background:navy!important}
-.CodeRay .annotation{color:#007}
-.CodeRay .attribute-name{color:navy}
-.CodeRay .attribute-value{color:#700}
-.CodeRay .binary{color:#509}
-.CodeRay .comment{color:#998;font-style:italic}
-.CodeRay .char{color:#04d}
-.CodeRay .char .content{color:#04d}
-.CodeRay .char .delimiter{color:#039}
-.CodeRay .class{color:#458;font-weight:bold}
-.CodeRay .complex{color:#a08}
-.CodeRay .constant,.CodeRay .predefined-constant{color:teal}
-.CodeRay .color{color:#099}
-.CodeRay .class-variable{color:#369}
-.CodeRay .decorator{color:#b0b}
-.CodeRay .definition{color:#099}
-.CodeRay .delimiter{color:#000}
-.CodeRay .doc{color:#970}
-.CodeRay .doctype{color:#34b}
-.CodeRay .doc-string{color:#d42}
-.CodeRay .escape{color:#666}
-.CodeRay .entity{color:#800}
-.CodeRay .error{color:#808}
-.CodeRay .exception{color:inherit}
-.CodeRay .filename{color:#099}
-.CodeRay .function{color:#900;font-weight:bold}
-.CodeRay .global-variable{color:teal}
-.CodeRay .hex{color:#058}
-.CodeRay .integer,.CodeRay .float{color:#099}
-.CodeRay .include{color:#555}
-.CodeRay .inline{color:#000}
-.CodeRay .inline .inline{background:#ccc}
-.CodeRay .inline .inline .inline{background:#bbb}
-.CodeRay .inline .inline-delimiter{color:#d14}
-.CodeRay .inline-delimiter{color:#d14}
-.CodeRay .important{color:#555;font-weight:bold}
-.CodeRay .interpreted{color:#b2b}
-.CodeRay .instance-variable{color:teal}
-.CodeRay .label{color:#970}
-.CodeRay .local-variable{color:#963}
-.CodeRay .octal{color:#40e}
-.CodeRay .predefined{color:#369}
-.CodeRay .preprocessor{color:#579}
-.CodeRay .pseudo-class{color:#555}
-.CodeRay .directive{font-weight:bold}
-.CodeRay .type{font-weight:bold}
-.CodeRay .predefined-type{color:inherit}
-.CodeRay .reserved,.CodeRay .keyword{color:#000;font-weight:bold}
-.CodeRay .key{color:#808}
-.CodeRay .key .delimiter{color:#606}
-.CodeRay .key .char{color:#80f}
-.CodeRay .value{color:#088}
-.CodeRay .regexp .delimiter{color:#808}
-.CodeRay .regexp .content{color:#808}
-.CodeRay .regexp .modifier{color:#808}
-.CodeRay .regexp .char{color:#d14}
-.CodeRay .regexp .function{color:#404;font-weight:bold}
-.CodeRay .string{color:#d20}
-.CodeRay .string .string .string{background:#ffd0d0}
-.CodeRay .string .content{color:#d14}
-.CodeRay .string .char{color:#d14}
-.CodeRay .string .delimiter{color:#d14}
-.CodeRay .shell{color:#d14}
-.CodeRay .shell .delimiter{color:#d14}
-.CodeRay .symbol{color:#990073}
-.CodeRay .symbol .content{color:#a60}
-.CodeRay .symbol .delimiter{color:#630}
-.CodeRay .tag{color:teal}
-.CodeRay .tag-special{color:#d70}
-.CodeRay .variable{color:#036}
-.CodeRay .insert{background:#afa}
-.CodeRay .delete{background:#faa}
-.CodeRay .change{color:#aaf;background:#007}
-.CodeRay .head{color:#f8f;background:#505}
-.CodeRay .insert .insert{color:#080}
-.CodeRay .delete .delete{color:#800}
-.CodeRay .change .change{color:#66f}
-.CodeRay .head .head{color:#f4f}
-</style>
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>AWS Secrets Manager - Secrets Retrieval and Refresh with Apache Camel On OCP</h1>
+<h1>Camel on Openshift CI/CD</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_context">1. Context</a></li>
 <li><a href="#_prerequisites">2. Prerequisites</a></li>
 <li><a href="#_goal">3. Goal</a></li>
-<li><a href="#_configuration">4. Configuration</a></li>
-<li><a href="#_enabling_secret_refresh">5. Enabling Secret Refresh</a></li>
-<li><a href="#_enabling_secret_refresh_with_eventbridgesqs">6. Enabling Secret Refresh with Eventbridge/SQS</a></li>
+<li><a href="#_approach">4. Approach</a>
+<ul class="sectlevel2">
+<li><a href="#_camel_cicd_exampleapp">4.1. Camel-cicd-exampleapp</a></li>
+<li><a href="#_camel_cicd_gitops">4.2. Camel-cicd-gitops</a></li>
+</ul>
+</li>
+<li><a href="#_openshift_pipelines_config">5. OpenShift Pipelines config</a></li>
+<li><a href="#_openshift_gitops_config">6. OpenShift GitOps config</a></li>
+<li><a href="#_usefull_links">7. Usefull links</a></li>
 </ul>
 </div>
 </div>
@@ -544,8 +461,7 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <h2 id="_context">1. Context</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Secret managers securely store sensitive data like API keys and passwords, preventing hardcoded secrets and reducing exposure risks. They provide encrypted storage, access control, and automated rotation, ensuring secure management of credentials across distributed applications.
-It is crucial, expecially in could environments, to be able to use such services.</p>
+<p>After having a working Camel application the next step is to deploy it in <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>Red Hat OpenShift</strong></a> possibly in multiple environments from dev to prod. Traditionally this is referred to as CI/CD and we will explore the best practices in the context of an <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>OpenShift</strong></a> environment.</p>
 </div>
 </div>
 </div>
@@ -553,296 +469,173 @@ It is crucial, expecially in could environments, to be able to use such services
 <h2 id="_prerequisites">2. Prerequisites</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>A camel integrationt o be deployed on <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>OpenShift</strong></a>.</p>
+<p>A <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>Red Hat OpenShift</strong></a> cluster with <a href="https://catalog.redhat.com/software/container-stacks/detail/5ec54a4628834587a6b85ca5"><strong>OpenShift Pipelines</strong></a> and <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops"><strong>OpenShift GitOps</strong></a> operators installed.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Be sure to have the right permissions configured for the OpenShift GitOps users. In particular to which groups they belong see <a href="https://docs.openshift.com/gitops/1.14/accesscontrol_usermanagement/configuring-sso-on-argo-cd-using-dex.html#gitops-dex-role-mappings_configuring-sso-for-argo-cd-using-dex">role mapping documentation</a>.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_goal">3. Goal</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Provide a configuration example to retrieve AWS Secrets Manager Secrets and use them in a camel integration.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_configuration">4. Configuration</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>First of all all of the following could be supported by simply adding
-the camel-aws-secrets-manager component to your classpath.</p>
-</div>
-<div class="paragraph">
-<p>To set up the secret retrieval with AWS Secrets Manager you have to
-first authenticate to the AWS Service. The mechanisms are:</p>
-</div>
-<div class="paragraph">
-<p>Static credentials in application.properties:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>camel.vault.aws.accessKey = accessKey
-camel.vault.aws.secretKey = secretKey
-camel.vault.aws.region = region</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Default Credentials Provider in application.properties:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>camel.vault.aws.defaultCredentialsProvider = true
-camel.vault.aws.region = region</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The static credentials could be a Kubernetes/OCP secret or you can mount
-a volume containing the AWS credentials file and use the default
-credentials provider chain. This is something up to the end user, but
-it’s important to stress the fact that AWS encourages the usage of
-default credentials provider chains instead of static credentials.</p>
-</div>
-<div class="paragraph">
-<p>Creating a secret on AWS will require to have access to the AWS Console
-or to AWS CLI with create-secret and general secret manager permissions.
-In general the suggested way of creating a secret is by using JSON.</p>
-</div>
-<div class="paragraph">
-<p>You can create a secret through AWS CLI with the following command:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>aws secretsmanager create-secret –name authsecdb –secret-string \file://secret.json</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Where the content of secret.json could be something like:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="json">{
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">username</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">postgresadmin</span><span class="delimiter">&quot;</span></span>,
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">password</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">xxxx</span><span class="delimiter">&quot;</span></span>,
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">host</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">host</span><span class="delimiter">&quot;</span></span>
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The secret name will be authsecdb and the secret fields will be
-username, password and host.</p>
-</div>
-<div class="paragraph">
-<p>In the Camel route it will be enough to use the following syntax and the
-secrets field will be retrieved.</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>{{aws:authsecdb/host}}
-{{aws:authsecdb/username}}
-{{aws:authsecdb/password}}</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>For more information about the usable syntax, you can look at <a href="https://camel.apache.org/components/4.8.x/aws-secrets-manager-component.html#_using_aws_secrets_manager_property_function">AWS Secrets Manager Property Function</a></p>
-</div>
-<div class="paragraph">
-<p>The Spring Boot and Quarkus runtime have the starter and the extension
-related to AWS Secret Manager in their catalogs. The export and export
-Kubernetes command from camel-jbang, will automatically add the
-dependency in case of the above syntax usage. This should be transparent
-to the end user.</p>
-</div>
-<div class="paragraph">
-<p>The same configuration could be seen on OCP by following the Camel on
-OCP Best Practices repository, in particular, the AWS vault section. You
-can follow the example for both the runtimes supported by Red Hat Build
-of Apache Camel:</p>
-</div>
-<div class="paragraph">
-<p><a href="https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/aws/camel-quarkus/retrieval">Camel-Quarkus
-- Camel on OCP Best practices - Camel Quarkus - AWS Vault</a></p>
-</div>
-<div class="paragraph">
-<p><a href="https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/aws/camel-spring-boot/retrieval">Camel-Spring-Boot
-- Camel on OCP Best practices - Camel Spring Boot - AWS Vault</a></p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_enabling_secret_refresh">5. Enabling Secret Refresh</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In the section above we saw how to set up and use the AWS Secret Manager
-Secrets retrieval. In this section, we’ll focus on introducing the
-Secret refresh in the picture. The Camel AWS Secret Manager refresh
-feature is based on the Cloudtrail entries related to the monitored
-secret. The reloading task will check for new events in relation to the
-secret and it will trigger a Camel context reload in case of an update.</p>
-</div>
-<div class="paragraph">
-<p>The AWS Secrets Refresh function will use the AWS Cloudtrail service to
-track events related to secret updates in the Cloudtrail trail. There
-are other ways of tracking changes, but all of them require knowing the
-secret’s name before creating the infrastructure on AWS.</p>
-</div>
-<div class="paragraph">
-<p>Enabling the Secret refresh feature doesn’t require any particular
-infrastructure operation. We’ll operate only at Camel level, by adding
-more properties to the configuration.</p>
-</div>
-<div class="paragraph">
-<p>The needed additional field for this purpose are:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>camel.vault.aws.refreshEnabled=true
-camel.vault.aws.refreshPeriod=60000
-camel.vault.aws.secrets=&lt;secretsName&gt;
-camel.main.context-reload-enabled = true</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Where secretsName is a comma-separated list of secrets names to track
-and monitor. It’s not mandatory to specify the parameter, Camel will
-take care of monitoring all the secrets for you.</p>
-</div>
-<div class="paragraph">
-<p>This will be enough to automatically refresh the Camel context on a
-secret value update.</p>
-</div>
-<div class="paragraph">
-<p>The same configuration could be seen on OCP by following the Camel on
-OCP Best Practices repository, in particular, the AWS vault section. You
-can follow the example for both the runtimes supported by Red Hat Build
-of Apache Camel:</p>
-</div>
-<div class="paragraph">
-<p><a href="https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/aws/camel-quarkus/retrieval-and-refresh">Camel-Quarkus
-- Camel on OCP Best practices - AWS Vault with Refresh</a></p>
-</div>
-<div class="paragraph">
-<p><a href="https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/aws/camel-spring-boot/retrieval-and-refresh">Camel-Spring-Boot
-- Camel on OCP Best practices - AWS Vault with Refresh</a></p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_enabling_secret_refresh_with_eventbridgesqs">6. Enabling Secret Refresh with Eventbridge/SQS</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The Camel AWS Secret Manager refresh feature is based on the Cloudtrail
-entries related to the monitored secret. The reloading task will check
-for new events in relation to the secret and it will trigger a Camel
-context reload in case of an update. In Camel 4.8.0, we introduced a new
-way of using the feature by leveraging the AWS Eventbridge service in
-combination with SQS.</p>
-</div>
-<div class="paragraph">
-<p>The idea is pretty simple: Eventbridge will filter Cloudtrail events
-based on rules and for each rule the user is able to set a target. In
-our case we create an Eventbridge rule for tracking AWS Secrets Manager
-events.</p>
-</div>
-<div class="paragraph">
-<p>On the AWS side, the following resources need to be created:</p>
-</div>
 <div class="ulist">
 <ul>
 <li>
-<p>an AWS Couldtrail trail</p>
-</li>
-<li>
-<p>an AWS SQS Queue</p>
-</li>
-<li>
-<p>an Eventbridge rule of the following kind</p>
+<p>Providing best practices on OpenShift CI/CD applied to Camel applications.</p>
 </li>
 </ul>
 </div>
-<div class="listingblock">
+</div>
+</div>
+<div class="sect1">
+<h2 id="_approach">4. Approach</h2>
+<div class="sectionbody">
+<div class="imageblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="json">{
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">source</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">aws.secretsmanager</span><span class="delimiter">&quot;</span></span>],
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">detail-type</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">AWS API Call via CloudTrail</span><span class="delimiter">&quot;</span></span>],
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">detail</span><span class="delimiter">&quot;</span></span>: {
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">eventSource</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">secretsmanager.amazonaws.com</span><span class="delimiter">&quot;</span></span>]
-  }
-}</code></pre>
+<img src="assets/ocp-cicd_diagram.svg" alt="Camel on Openshift CI/CD diagram">
 </div>
+<div class="title">Figure 1. Camel on Openshift CI/CD diagram</div>
 </div>
 <div class="paragraph">
-<p>User needs to set the a Rule target to the AWS SQS Queue for Eventbridge
-rule</p>
+<p>The proposed architecture is to use <a href="https://catalog.redhat.com/software/container-stacks/detail/5ec54a4628834587a6b85ca5"><strong>OpenShift Pipelines</strong></a> for the CI part, to build the Camel application image, push it to an image registry and then update the repository containing the <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>OpenShift</strong></a> deployment yaml resources.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The Push Images step can target the internal OpenShift registry (like in the example repository of this document) or external image registries public or private.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The Update resources step can be performed manually (like it is assumed in the example repository of this document) or automated as part of the CI pipeline. The automation can be partial by just opening a PR against the Yaml git repository or it can also be automatically merged if necessary.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>User needs to give permission to the Eventbrige rule, to write on the
-above SQS Queue. For doing this you’ll need to define a json file like
-this:</p>
+<p>The CD part is managed by <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops"><strong>OpenShift GitOps</strong></a> that combining the yaml resources and the built image would deploy the Camel application in the appropriate environments (for instance dev and prod).</p>
 </div>
-<div class="listingblock">
+<div class="paragraph">
+<p>Two repositories are provided as examples, the example app repo <a href="https://github.com/valdar/camel-cicd-exampleapp">camel-cicd-exampleapp</a> and the example gitops repo <a href="https://github.com/valdar/camel-cicd-gitops">camel-cicd-gitops</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="_camel_cicd_exampleapp">4.1. Camel-cicd-exampleapp</h3>
+<div class="paragraph">
+<p>The camel-cicd-exampleapp repository contains a simple camel application. The maven project <a href="https://github.com/valdar/camel-cicd-exampleapp/blob/main/pom.xml#L118-L159">has been configured</a> to copy in the <code>etc/</code> folder the k8s/openshift resources generated during the build process by invoking <code>mvn clean install package</code> command. The <code>etc/</code> folder also contains the OpenShift pipelines (Tekton) definitions in the file named <code>pipeline.yaml</code> as well as an utility script (<code>cleanup-generated-kubernetes-resources.groovy)</code> useful during 8s/openshift resources generation.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_camel_cicd_gitops">4.2. Camel-cicd-gitops</h3>
+<div class="paragraph">
+<p>The camel-cicd-gitops project contains a typical <a href="https://kustomize.io/">kustomize</a> structure where the k8s/openshift resources are the one generated by camel-cicd-exampleapp project and copied in the k8s`/openshift.yaml` file. Those resources are the ones used by Openshift GitOps (ArgoCD) to deploy the application.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_openshift_pipelines_config">5. OpenShift Pipelines config</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The CI tekton pipeline can be created visually through OpenShitf console or its yaml representation can be imported and modified if/as needed. In order to do so run <code>oc apply -f camel-cicd-exampleapp/etc/pipeline.yaml</code>, then the pipeline should be visible under the pipeline tab of the developer perspective of the OpenShift console.</p>
+</div>
+<div class="imageblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="json">{
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">Policy</span><span class="delimiter">&quot;</span></span>: {
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">Version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2012-10-17</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">Id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">&lt;queue_arn&gt;/SQSDefaultPolicy</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">Statement</span><span class="delimiter">&quot;</span></span>: [
-      {
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">Sid</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">EventsToMyQueue</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">Effect</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Allow</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">Principal</span><span class="delimiter">&quot;</span></span>: {
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">Service</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">events.amazonaws.com</span><span class="delimiter">&quot;</span></span>
-        },
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">Action</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">sqs:SendMessage</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">Resource</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">&lt;queue_arn&gt;</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">Condition</span><span class="delimiter">&quot;</span></span>: {
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">ArnEquals</span><span class="delimiter">&quot;</span></span>: {
-            <span class="key"><span class="delimiter">&quot;</span><span class="content">aws:SourceArn</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">&lt;eventbridge_rule_arn&gt;</span><span class="delimiter">&quot;</span></span>
-          }
-        }
-      }
-    ]
-  }
-}</code></pre>
+<img src="assets/ocp-cicd_pipeline.png" alt="Camel on Openshift Tekton pipeline">
 </div>
+<div class="title">Figure 2. Camel on Openshift Tekton pipeline</div>
 </div>
 <div class="paragraph">
-<p>Change the values for queue_arn and eventbridge_rule_arn, save the file
-with policy.json name and run the following command with AWS CLI</p>
+<p>That pipeline can be edited as needed and then started</p>
 </div>
-<div class="literalblock">
+<div class="imageblock">
 <div class="content">
-<pre>aws sqs set-queue-attributes --queue-url &lt;queue_url&gt; --attributes \file://policy.json</pre>
+<img src="assets/ocp-cicd_pipeline_start.png" alt="Starting Camel on Openshift Tekton pipeline">
+</div>
+<div class="title">Figure 3. Starting Camel on Openshift Tekton pipeline</div>
 </div>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_openshift_gitops_config">6. OpenShift GitOps config</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>where queue_url is the AWS SQS Queue URL of the just created Queue.</p>
+<p>Let’s use Argo CD to create a new application. You can also visit Argo CD from your OpenShift cluster. Within the Developer perspective, navigate to the openshift-gitops project, and visit the Topology page.</p>
 </div>
-<div class="paragraph">
-<p>The needed additional fields for this purpose are:</p>
-</div>
-<div class="literalblock">
+<div class="imageblock">
 <div class="content">
-<pre>camel.vault.aws.refreshEnabled=true
-camel.vault.aws.refreshPeriod=60000
-camel.vault.aws.secrets=&lt;secretsName&gt;
-camel.main.context-reload-enabled = true
-camel.vault.aws.useSqsNotification=true
-camel.vault.aws.sqsQueueUrl=&lt;queue_url&gt;</pre>
+<img src="assets/ocp-cicd_argocd.png" alt="Openshift GitOps project topology">
 </div>
+<div class="title">Figure 4. Openshift GitOps project topology</div>
 </div>
 <div class="paragraph">
-<p>Where secretsName is a comma-separated list of secrets names to track
-and monitor. It’s not mandatory to specify the parameter, Camel will
-take care of monitoring all the secrets for you.</p>
+<p>Click on the Argo CD route to visit the Argo CD dashboard. You’ll be prompted to log in to Argo CD, and you can use the Login with OpenShift button to do so.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/ocp-cicd_argocd_login.png" alt="Openshift GitOps login">
+</div>
+<div class="title">Figure 5. Openshift GitOps login</div>
 </div>
 <div class="paragraph">
-<p>This will be enough to automatically refresh the Camel context on a
-secret value update.</p>
+<p>Within the Argo CD web console, click the \+ New App button. This will open the New Application form, where we can fill in the necessary information to create a new application in our development environment.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/ocp-cicd_argocd_newapp.png" alt="Openshift GitOps New App">
+</div>
+<div class="title">Figure 6. Openshift GitOps New App</div>
 </div>
 <div class="paragraph">
-<p>This approach with Eventbridge is probably the most reliable among the
-solutions we have. Mainly because we are going to search only for
-Secrets Manager events instead of Cloudtrail full events list.</p>
+<p>Fill in the following information, many of which may auto-fill when selected:
+* Application Name: camel-cicd-exampleapp
+* Project Name: default
+* Sync Policy: Automatic
+* Self Heal: Disabled
+* Auto-Create Namespace: Enabled
+* Repository URL: <a href="https://github.com/valdar/camel-cicd-gitops" class="bare">https://github.com/valdar/camel-cicd-gitops</a>
+* Revision: main
+* Path: environments/dev
+* Cluster URL: <a href="https://kubernetes.default.svc" class="bare">https://kubernetes.default.svc</a>
+* Namespace: the namespace you want the app deployied into</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_usefull_links">7. Usefull links</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.youtube.com/watch?v=6Vv9iQMggiY">General approach demoed and explained</a></p>
+</li>
+<li>
+<p><a href="https://redhat-scholars.github.io/inner-outer-guides/inner-outer-guides/main/m1/intro.html">General approach hands one course</a></p>
+</li>
+<li>
+<p><a href="https://github.com/blues-man/vote-app-gitops?tab=readme-ov-file#openshift-gitops-demo-tekton&#8212;&#8203;argo-cd">General approach demo and course repository</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>

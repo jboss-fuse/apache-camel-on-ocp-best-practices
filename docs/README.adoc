@@ -19,6 +19,10 @@ A curated list of documented best practices to use Apache Camel on https://www.r
 === xref:azure-key-vault.adoc[Azure Key Vault]
 === xref:hashicorp-vault.adoc[Hashicorp Vault]
 
+== CI/CD
+
+=== xref:ocp-cicd.adoc[OCP CI/CD]
+
 == OCP Configmaps/Secrets
 
 === xref:ocp-secrets.adoc[OCP Secrets]

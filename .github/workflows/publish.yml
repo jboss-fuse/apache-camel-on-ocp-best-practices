@@ -22,7 +22,7 @@ jobs:
       run: sudo mv public/README.html public/index.html
 
     - name: Copy asset folder to public/ dir
-      run: sudo cp -r docs/assets/ public/assets
+      run: sudo cp -r docs/assets/ public/
 
     - name: Print execution time
       run: echo "Time ${{ steps.adocbuild.outputs.time }}"

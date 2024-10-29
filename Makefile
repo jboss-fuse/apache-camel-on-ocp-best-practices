@@ -6,10 +6,10 @@ default: build ;
 build:
 	asciidoctor -D localpreview/ --backend=html5 docs/*.adoc
 	mv localpreview/README.html localpreview/index.html
-	cp -r docs/assets/ localpreview/assets
+	cp -r docs/assets/ localpreview/
 
 open-preview:
 	xdg-open ./localpreview/index.html
 
 clean:
-	rm -rf .localpreview/
+	rm -rf ./localpreview/

@@ -74,6 +74,7 @@ Within the Argo CD web console, click the \+ New App button. This will open the 
 image::assets/ocp-cicd_argocd_newapp.png[Openshift GitOps New App]
 
 Fill in the following information, many of which may auto-fill when selected:
+
 * Application Name: camel-cicd-exampleapp
 * Project Name: default
 * Sync Policy: Automatic
@@ -84,6 +85,8 @@ Fill in the following information, many of which may auto-fill when selected:
 * Path: environments/dev
 * Cluster URL: https://kubernetes.default.svc
 * Namespace: the namespace you want the app deployied into
+
+When finished, click the CREATE button in the top left-hand corner. This will create the application in Argo CD and begin the syncing process.
 
 == Usefull links
 

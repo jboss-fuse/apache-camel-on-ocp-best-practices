@@ -1,0 +1,96 @@
+= Camel on OCP Best Practices - Observability
+:icons: font
+:numbered:
+:title: Best practice document for Observability of Camel applications in OCP
+:toc: left
+:toclevels: 2
+:source-highlighter: coderay
+
+== Context
+
+Observability is an important element in an application, especially in the context of Openshift and the cloud.
+This document describes best practices for Observability concerning Camel applications on OCP.
+
+== Observability Best practice 
+
+Since the OpenShift Observability feature <<1>> is already part of the product, the idea is to integrate the application metrics, traces, and logs in this feature, with the minimum footprint in the application itself.
+
+Since the OpenTelemetry <<2>> is becoming the standard for the collection of the metrics, traces, and logs, the solution would adopt the standards to be scalable configurable, and compliant with all the applications, collectors, ingesters, and storages supporting this standard.
+
+There is already a Red Hat build of OpenTelemetry <<3>> operator that manages both collectors and instrumentations of an OCP deployment so the solution would be based on this operator.
+
+== Agent instrumentation solution
+
+One solution is to keep the application as is and to let the operator inject the agent in the JVM using the JAVA_TOOL_OPTIONS env variable. 
+The application has no changes in this solution (no special dependencies or custom code)
+
+=== Steps
+
+* Install Red Hat build of OpenTelemetry operator
+* Create OpenTelemetryCollector custom resource
+* Create  Instrumentation custom resource
+* Add the annotation _instrumentation.opentelemetry.io/inject-java: "true"_ to allow the application to be instrumented by the operator
+
+The solution allows one collector to collect all the metrics, traces, and logs for each application in the namespace
+
+=== Data visualization
+
+The OpenTelemetry collector allows the export of metrics in Prometheus standard, configuring the exporter accordingly, like:
+
+[source,yaml]
+----
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel
+spec:
+  config:
+    exporters:
+      prometheus:
+        add_metric_suffixes: false
+        const_labels:
+          application: otel-sb
+        enable_open_metrics: true
+        endpoint: '0.0.0.0:8889'
+        metric_expiration: 180m
+        resource_to_telemetry_conversion:
+          enabled: true
+----
+
+The above configuration exposes the Prometheus endpoint so that it can be scraped by the OpenShift service monitor <<4>> and visualized in the integrated Metrics visualization (moreover it is possible to create custom alerts, based on data received)
+
+=== Tracing
+
+About tracing visualization, we rely on external UI such as Jaeger (Tempo as storage is preferred since Jaeger is deprecated <<5>>) and this is possible because the tools use OpenTelemetry standard
+
+To visualize Traces directly to the OCP web console it is possible to use the Cluster Observability Operator <<6>> that allows you to create a Traces menu item under the Observability menu section, using the UIPlugin of type DistributedTracing custom resource.
+Currently, the visualization of the traces is limited, so the Jaeger UI cannot be fully replaced, but it will be possible to replace it once all the features have been implemented.
+
+
+A POC of a CSB application and operator configuration is available https://gitlab.cee.redhat.com/mcarlett/observable-csb[here]
+
+=== Logging
+
+The recommended storage for collecting logs is Loki <<7>> and there are basically 2 main ways to send data to the storage:
+
+* Using OpenTelemetry <<8>> (currently the version on the RH build of OpenTelemetry doesn’t support OTEL), so all the log lines will be sent by the agent to the collector via HTTP.
+The solution is also discussed in the document Ingest logs from OpenTelemetry collector into LokiStack. The most efficient way to use OpenTelemetry is using the filelog receiver installed as OCP DeamonSet <<9>>.
+We need to find a standard format to scrape logs and send structured information.
+* Scraping the log files in the nodes, using a Vector collector
+
+In September will be released the new stack for logging that supports Loki+OpenTelemetry https://issues.redhat.com/browse/OBSDA-740
+
+Guide to installing OpenShift Logging collector + Loki as storage https://docs.google.com/document/d/1INyTh-YJmvnZGcjaEbr9rAmrTyj2ohFCFAPJwSzt4Zo[OCP logging with Lokistack] as a current alternative to OpenTelemetry
+
+[bibliography]
+= Appendix
+
+* [[[1]]] https://www.redhat.com/en/technologies/cloud-computing/openshift/observability https://docs.openshift.com/container-platform/4.16/observability/index.html
+* [[[2]]] https://opentelemetry.io/ 
+* [[[3]]] https://docs.openshift.com/container-platform/4.16/observability/otel/otel-rn.html 
+* [[[4]]] https://docs.openshift.com/container-platform/4.16/observability/monitoring/managing-metrics.html 
+* [[[5]]] https://docs.openshift.com/container-platform/4.16/observability/distr_tracing/distr_tracing_jaeger/distr-tracing-jaeger-installing.html 
+* [[[6]]] https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html-single/cluster_observability_operator/ 
+* [[[7]]] https://docs.openshift.com/container-platform/4.16/observability/logging/log_storage/about-log-storage.html 
+* [[[8]]] https://grafana.com/docs/loki/latest/send-data/otel/ 
+* [[[9]]] https://opentelemetry.io/docs/kubernetes/collector/components/#filelog-receiver 

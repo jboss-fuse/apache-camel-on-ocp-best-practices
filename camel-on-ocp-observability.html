@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.23">
-<title>GCP Secrets Manager Secrets Retrieval and Refresh with Apache Camel On OCP</title>
+<title>Best practice document for Observability of Camel applications in OCP</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -526,15 +526,21 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>GCP Secrets Manager - Secrets Retrieval and Refresh with Apache Camel On OCP</h1>
+<h1>Camel on OCP Best Practices - Observability</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_context">1. Context</a></li>
-<li><a href="#_prerequisites">2. Prerequisites</a></li>
-<li><a href="#_goal">3. Goal</a></li>
-<li><a href="#_configuration">4. Configuration</a></li>
-<li><a href="#_gcp_secrets_manager_enabling_secret_refresh">5. GCP Secrets Manager Enabling Secret Refresh</a></li>
+<li><a href="#_observability_best_practice">2. Observability Best practice</a></li>
+<li><a href="#_agent_instrumentation_solution">3. Agent instrumentation solution</a>
+<ul class="sectlevel2">
+<li><a href="#_steps">3.1. Steps</a></li>
+<li><a href="#_data_visualization">3.2. Data visualization</a></li>
+<li><a href="#_tracing">3.3. Tracing</a></li>
+<li><a href="#_logging">3.4. Logging</a></li>
+</ul>
+</li>
+<li><a href="#_appendix">Appendix</a></li>
 </ul>
 </div>
 </div>
@@ -543,313 +549,155 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <h2 id="_context">1. Context</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Secret managers securely store sensitive data like API keys and passwords, preventing hardcoded secrets and reducing exposure risks. They provide encrypted storage, access control, and automated rotation, ensuring secure management of credentials across distributed applications.
-It is crucial, expecially in could environments, to be able to use such services.</p>
+<p>Observability is an important element in an application, especially in the context of Openshift and the cloud.
+This document describes best practices for Observability concerning Camel applications on OCP.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_prerequisites">2. Prerequisites</h2>
+<h2 id="_observability_best_practice">2. Observability Best practice</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>A camel integrationt o be deployed on <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>OpenShift</strong></a>.</p>
+<p>Since the OpenShift Observability feature <a href="#ocp-observability">[1]</a> is already part of the product, the idea is to integrate the application metrics, traces, and logs in this feature, with the minimum footprint in the application itself.</p>
+</div>
+<div class="paragraph">
+<p>Since the OpenTelemetry <a href="#otel">[2]</a> is becoming the standard for the collection of the metrics, traces, and logs, the solution would adopt the standards to be scalable configurable, and compliant with all the applications, collectors, ingesters, and storages supporting this standard.</p>
+</div>
+<div class="paragraph">
+<p>There is already a Red Hat build of OpenTelemetry <a href="#redhat-otel">[3]</a> operator that manages both collectors and instrumentations of an OCP deployment so the solution would be based on this operator.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_goal">3. Goal</h2>
+<h2 id="_agent_instrumentation_solution">3. Agent instrumentation solution</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Provide a configuration example to retrieve GCP Secrets Manager Secrets and use them in a camel integration.</p>
+<p>One solution is to keep the application as is and to let the operator inject the agent in the JVM using the JAVA_TOOL_OPTIONS env variable.
+The application has no changes in this solution (no special dependencies or custom code)</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_configuration">4. Configuration</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>First of all all of the following could be supported by simply adding
-the camel-google-secret-manager component to your classpath.</p>
-</div>
-<div class="paragraph">
-<p>To set up the secret retrieval with Google Secrets Manager you have to
-first authenticate to the Google Cloud Services. The mechanisms are:</p>
-</div>
-<div class="paragraph">
-<p>Static credentials in application.properties:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>camel.vault.gcp.serviceAccountKey = serviceAccountKey
-camel.vault.gcp.projectId = projectId</pre>
-</div>
+<div class="sect2">
+<h3 id="_steps">3.1. Steps</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Install Red Hat build of OpenTelemetry operator</p>
+</li>
+<li>
+<p>Create OpenTelemetryCollector custom resource</p>
+</li>
+<li>
+<p>Create  Instrumentation custom resource</p>
+</li>
+<li>
+<p>Add the annotation <em>instrumentation.opentelemetry.io/inject-java: "true"</em> to allow the application to be instrumented by the operator</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>Default Instance in application.properties:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>camel.vault.gcp.useDefaultInstance = true
-camel.vault.gcp.projectId = region</pre>
+<p>The solution allows one collector to collect all the metrics, traces, and logs for each application in the namespace</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_data_visualization">3.2. Data visualization</h3>
 <div class="paragraph">
-<p>The service account key file could be a Kubernetes/OCP secret or you can
-mount a volume containing the service account key file and use it as a
-reference in the configuration. This is something up to the end user.</p>
-</div>
-<div class="paragraph">
-<p>Creating a secret on GCP will require to have access to the Google Cloud
-Console or to Google Cloud CLI with create-secret and general secret
-manager permissions. In general, the suggested way of creating a secret
-is by using JSON.</p>
-</div>
-<div class="paragraph">
-<p>You can create a secret through Gcloud CLI with the following command:</p>
-</div>
-<div class="paragraph">
-<p><code>gcloud secrets create authsecdb --data-file=secret.json</code></p>
-</div>
-<div class="paragraph">
-<p>Where the content of secret.json could be something like:</p>
+<p>The OpenTelemetry collector allows the export of metrics in Prometheus standard, configuring the exporter accordingly, like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="json">{
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">username</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">postgresadmin</span><span class="delimiter">&quot;</span></span>,
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">password</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">xxxx</span><span class="delimiter">&quot;</span></span>,
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">host</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">host</span><span class="delimiter">&quot;</span></span>
-}</code></pre>
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="key">apiVersion</span>: <span class="string"><span class="content">opentelemetry.io/v1beta1</span></span>
+<span class="key">kind</span>: <span class="string"><span class="content">OpenTelemetryCollector</span></span>
+<span class="key">metadata</span>:
+  <span class="key">name</span>: <span class="string"><span class="content">otel</span></span>
+<span class="key">spec</span>:
+  <span class="key">config</span>:
+    <span class="key">exporters</span>:
+      <span class="key">prometheus</span>:
+        <span class="key">add_metric_suffixes</span>: <span class="string"><span class="content">false</span></span>
+        <span class="key">const_labels</span>:
+          <span class="key">application</span>: <span class="string"><span class="content">otel-sb</span></span>
+        <span class="key">enable_open_metrics</span>: <span class="string"><span class="content">true</span></span>
+        <span class="key">endpoint</span>: <span class="string"><span class="content">'0.0.0.0:8889'</span></span>
+        <span class="key">metric_expiration</span>: <span class="string"><span class="content">180m</span></span>
+        <span class="key">resource_to_telemetry_conversion</span>:
+          <span class="key">enabled</span>: <span class="string"><span class="content">true</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The secret name will be authsecdb and the secret fields will be
-username, password and host.</p>
+<p>The above configuration exposes the Prometheus endpoint so that it can be scraped by the OpenShift service monitor <a href="#ocp-service-monitor">[4]</a> and visualized in the integrated Metrics visualization (moreover it is possible to create custom alerts, based on data received)</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tracing">3.3. Tracing</h3>
+<div class="paragraph">
+<p>About tracing visualization, we rely on external UI such as Jaeger (Tempo as storage is preferred since Jaeger is deprecated <a href="#jaeger-deprecation">[5]</a>) and this is possible because the tools use OpenTelemetry standard</p>
 </div>
 <div class="paragraph">
-<p>In the Camel route it will be enough to use the following syntax and the
-secrets field will be retrieved.</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>{{gcp:authsecdb/host}}
-{{gcp:authsecdb/username}}
-{{gcp:authsecdb/password}}</pre>
-</div>
+<p>To visualize Traces directly to the OCP web console it is possible to use the Cluster Observability Operator <a href="#cluster-observability-op">[6]</a> that allows you to create a Traces menu item under the Observability menu section, using the UIPlugin of type DistributedTracing custom resource.
+Currently, the visualization of the traces is limited, so the Jaeger UI cannot be fully replaced, but it will be possible to replace it once all the features have been implemented.</p>
 </div>
 <div class="paragraph">
-<p>For more information about the usable syntax, you can look at <a href="https://camel.apache.org/components/4.8.x/google-secret-manager-component.html#_using_gcp_secret_manager_properties_source">Google Secret Manager Property Function</a></p>
+<p>A POC of a CSB application and operator configuration is available <a href="https://gitlab.cee.redhat.com/mcarlett/observable-csb">here</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_logging">3.4. Logging</h3>
+<div class="paragraph">
+<p>The recommended storage for collecting logs is Loki <a href="#log-storage">[7]</a> and there are basically 2 main ways to send data to the storage:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Using OpenTelemetry <a href="#otel-support">[8]</a> (currently the version on the RH build of OpenTelemetry doesn’t support OTEL), so all the log lines will be sent by the agent to the collector via HTTP.
+The solution is also discussed in the document Ingest logs from OpenTelemetry collector into LokiStack. The most efficient way to use OpenTelemetry is using the filelog receiver installed as OCP DeamonSet <a href="#otel-configuration">[9]</a>.
+We need to find a standard format to scrape logs and send structured information.</p>
+</li>
+<li>
+<p>Scraping the log files in the nodes, using a Vector collector</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>The Spring Boot and Quarkus runtime have the starter and the extension
-related to AWS Secret Manager in their catalogs. The export and export
-Kubernetes command from camel-jbang, will automatically add the
-dependency in case of the above syntax usage. This should be transparent
-to the end user.</p>
+<p>In September will be released the new stack for logging that supports Loki+OpenTelemetry <a href="https://issues.redhat.com/browse/OBSDA-740" class="bare">https://issues.redhat.com/browse/OBSDA-740</a></p>
 </div>
 <div class="paragraph">
-<p>The same configuration could be seen on OCP by following the Camel on
-OCP Best Practices repository, in particular, the GCP vault section. You
-can follow the example for both the runtimes supported by Red Hat Build
-of Apache Camel:</p>
+<p>Guide to installing OpenShift Logging collector + Loki as storage <a href="https://docs.google.com/document/d/1INyTh-YJmvnZGcjaEbr9rAmrTyj2ohFCFAPJwSzt4Zo">OCP logging with Lokistack</a> as a current alternative to OpenTelemetry</p>
 </div>
-<div class="paragraph">
-<p><a href="https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/gcp/camel-quarkus/retrieval">Camel-Quarkus
-- Camel on OCP Best practices - GCP Vault</a></p>
-</div>
-<div class="paragraph">
-<p><a href="https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/gcp/camel-spring-boot/retrieval">Camel-Spring-Boot
-- Camel on OCP Best practices - GCP Vault</a></p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_gcp_secrets_manager_enabling_secret_refresh">5. GCP Secrets Manager Enabling Secret Refresh</h2>
+<h2 id="_appendix">Appendix</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>In the section above we saw how to set up and use the Google Secret
-Manager Secrets retrieval. In this section, we’ll focus on introducing
-the Secret refresh in the picture. The Camel Google Secret Manager
-refresh feature is based on the relation between a secret and a
-dedicated Google PubSub topic resource, receiving events from the
-Monitored Secret. The reloading task will check for new events in
-relation to the secret and it will trigger a Camel context reload in
-case of an update.</p>
-</div>
-<div class="paragraph">
-<p>The Google Secrets Refresh function will use the Google PubSub service
-to track events related to secrets.</p>
-</div>
-<div class="paragraph">
-<p>Enabling the Secret refresh feature requires particular infrastructure
-operations.</p>
-</div>
-<div class="paragraph">
-<p>The needed additional fields for this purpose are:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>camel.vault.gcp.projectId=projectId
-camel.vault.gcp.refreshEnabled=true
-camel.vault.gcp.refreshPeriod=60000
-camel.vault.gcp.secrets=secretsName
-camel.vault.gcp.subscriptionName=subscriptionName
-camel.main.context-reload-enabled = true</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Where secretsName is a comma-separated list of secrets names to track
-and monitor and subscriptionName is the subscription name to Google
-PubSub Topic. It’s not mandatory to specify the secrets parameter, Camel
-will take care of monitoring all the secrets for you.</p>
-</div>
-<div class="paragraph">
-<p>For the infrastructure part we’ll need to follow a guide including
-creating a Google project and preparing Google PubSub.</p>
-</div>
-<div class="paragraph">
-<p>First of all you’ll need to install the gcloud cli from
-<a href="https://cloud.google.com/sdk/docs/install" class="bare">https://cloud.google.com/sdk/docs/install</a></p>
-</div>
-<div class="paragraph">
-<p>Once the Cli has been installed we can proceed to log in and to set up
-the project with the following commands:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud auth login</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>and</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud projects create gcp-sec-refresh --name="GCP Secret Manager Refresh"</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The project will need a service identity for using secret manager
-service and we’ll be able to have that through the command:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud beta services identity create --service "secretmanager.googleapis.com" --project "gcp-sec-refresh"</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The latter command will provide a service account name that we need to
-export</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>export SM_SERVICE_ACCOUNT="service-...."</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Since we want to have notifications about events related to a specific
-secret through a Google Pubsub topic we’ll need to create a topic for
-this purpose with the following command:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud pubsub topics create "projects/gcp-sec-refresh/topics/pubsub-gcp-sec-refresh"</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The service account will need Secret Manager authorization to publish
-messages on the topic just created, so we’ll need to add an iam policy
-binding with the following command:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud pubsub topics add-iam-policy-binding pubsub-gcp-sec-refresh --member "serviceAccount:${SM_SERVICE_ACCOUNT}" --role "roles/pubsub.publisher" --project gcp-sec-refresh</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>We now need to create a subscription to the pubsub-gcp-sec-refresh just
-created and we’re going to call it sub-gcp-sec-refresh with the
-following command:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud pubsub subscriptions create "projects/gcp-sec-refresh/subscriptions/sub-gcp-sec-refresh" --topic "projects/gcp-sec-refresh/topics/pubsub-gcp-sec-refresh"</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Now we need to create a service account for running our application:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud iam service-accounts create gcp-sec-refresh-sa --description="GCP Sec Refresh SA" --project gcp-sec-refresh</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Let’s give the SA an owner role:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud projects add-iam-policy-binding gcp-sec-refresh --member="serviceAccount:gcp-sec-refresh-sa@gcp-sec-refresh.iam.gserviceaccount.com" --role="roles/owner"</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Now we should create a Service account key file for the just create SA:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud iam service-accounts keys create gcp-sec-refresh.json --iam-account=gcp-sec-refresh-sa@gcp-sec-refresh.iam.gserviceaccount.com</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Modify the application.properties file to point to serviceAccountKey
-property to the just create gcp-sec-refresh.json file.</p>
-</div>
-<div class="paragraph">
-<p>Let’s enable the Secret Manager API for our project</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud services enable secretmanager.googleapis.com --project gcp-sec-refresh</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Let’s enable the Pubsub API for our project</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud services enable pubsub.googleapis.com --project gcp-sec-refresh</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>If needed enable also the Billing API.</p>
-</div>
-<div class="paragraph">
-<p>Now it’s time to create our hello secret, with topic notification:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud secrets create authsecdb --topics=projects/gcp-sec-refresh/topics/pubsub-gcp-sec-refresh --project=gcp-sec-refresh</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>And let’s add the value</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>gcloud secrets versions add hello --data-file=secret.json --project=gcp-sec-refresh</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The same configuration could be seen on OCP by following the Camel on
-OCP Best Practices repository, in particular, the GCP vault section:</p>
-</div>
-<div class="paragraph">
-<p><a href="https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/gcp/camel-quarkus/retrieval-and-refresh">Camel-Quarkus
-- Camel on OCP Best practices - GCP Vault with refresh</a></p>
-</div>
-<div class="paragraph">
-<p><a href="https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/gcp/camel-spring-boot/retrieval-and-refresh">Camel-Spring-Boot
-- Camel on OCP Best practices - GCP Vault with refresh</a></p>
+<div class="ulist bibliography">
+<ul class="bibliography">
+<li>
+<p><a id="ocp-observability"></a>[1] <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift/observability" class="bare">https://www.redhat.com/en/technologies/cloud-computing/openshift/observability</a>, <a href="https://docs.openshift.com/container-platform/4.16/observability/index.html" class="bare">https://docs.openshift.com/container-platform/4.16/observability/index.html</a></p>
+</li>
+<li>
+<p><a id="otel"></a>[2] <a href="https://opentelemetry.io/" class="bare">https://opentelemetry.io/</a></p>
+</li>
+<li>
+<p><a id="redhat-otel"></a>[3] <a href="https://docs.openshift.com/container-platform/4.16/observability/otel/otel-rn.html" class="bare">https://docs.openshift.com/container-platform/4.16/observability/otel/otel-rn.html</a></p>
+</li>
+<li>
+<p><a id="ocp-service-monitor"></a>[4] <a href="https://docs.openshift.com/container-platform/4.16/observability/monitoring/managing-metrics.html" class="bare">https://docs.openshift.com/container-platform/4.16/observability/monitoring/managing-metrics.html</a></p>
+</li>
+<li>
+<p><a id="jaeger-deprecation"></a>[5] <a href="https://docs.openshift.com/container-platform/4.16/observability/distr_tracing/distr_tracing_jaeger/distr-tracing-jaeger-installing.html" class="bare">https://docs.openshift.com/container-platform/4.16/observability/distr_tracing/distr_tracing_jaeger/distr-tracing-jaeger-installing.html</a></p>
+</li>
+<li>
+<p><a id="cluster-observability-op"></a>[6] <a href="https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html-single/cluster_observability_operator/" class="bare">https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html-single/cluster_observability_operator/</a></p>
+</li>
+<li>
+<p><a id="log-storage"></a>[7] <a href="https://docs.openshift.com/container-platform/4.16/observability/logging/log_storage/about-log-storage.html" class="bare">https://docs.openshift.com/container-platform/4.16/observability/logging/log_storage/about-log-storage.html</a></p>
+</li>
+<li>
+<p><a id="otel-support"></a>[8] <a href="https://grafana.com/docs/loki/latest/send-data/otel/" class="bare">https://grafana.com/docs/loki/latest/send-data/otel/</a></p>
+</li>
+<li>
+<p><a id="otel-configuration"></a>[9] <a href="https://opentelemetry.io/docs/kubernetes/collector/components/#filelog-receiver" class="bare">https://opentelemetry.io/docs/kubernetes/collector/components/#filelog-receiver</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>

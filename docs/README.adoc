@@ -18,6 +18,7 @@ A curated list of documented best practices to use Apache Camel on https://www.r
 === xref:gcp-secret-manager-vault.adoc[GCP Secret Manager]
 === xref:azure-key-vault.adoc[Azure Key Vault]
 === xref:hashicorp-vault.adoc[Hashicorp Vault]
+=== xref:external-secrets-operator-vault-interops.adoc[External Secrets Operator]
 
 == CI/CD
 

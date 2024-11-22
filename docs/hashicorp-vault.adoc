@@ -59,8 +59,8 @@ OCP Best Practices repository, in particular, the Hashicorp vault section. You
 can follow the example for both the runtimes supported by Red Hat Build
 of Apache Camel:
 
-https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/hashicorp-vault/camel-quarkus/retrieval[Camel-Quarkus
+https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/vault/hashicorp-vault/camel-quarkus/retrieval[Camel-Quarkus
 - Camel on OCP Best practices - Camel Quarkus - Hashicorp Vault]
 
-https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/hashicorp-vault/camel-spring-boot/retrieval[Camel-Quarkus
+https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/vault/hashicorp-vault/camel-spring-boot/retrieval[Camel-Quarkus
 - Camel on OCP Best practices - Camel Spring Boot - Hashicorp Vault]

@@ -126,10 +126,10 @@ OCP Best Practices repository, in particular, the AWS vault section. You
 can follow the example for both the runtimes supported by Red Hat Build
 of Apache Camel:
 
-https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/azure/camel-quarkus/retrieval[Camel-Quarkus
+https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/vault/azure/camel-quarkus/retrieval[Camel-Quarkus
 - Camel on OCP Best practices - Camel Quarkus - Azure Key Vault]
 
-https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/azure/camel-spring-boot/retrieval[Camel-Spring-Boot
+https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/vault/azure/camel-spring-boot/retrieval[Camel-Spring-Boot
 - Camel on OCP Best practices - Camel Spring Boot - Azure Key Vault]
 
 == Enabling Secret Refresh
@@ -282,9 +282,9 @@ The Spring Boot and Quarkus runtime have the starter and the extension related t
 
 The same configuration could be seen on OCP by following the Camel on OCP Best Practices repository, in particular, the Azure Key vault section: 
 
-https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/azure/camel-quarkus/retrieval-and-refresh[Camel-Quarkus
+https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/vault/azure/camel-quarkus/retrieval-and-refresh[Camel-Quarkus
 - Camel on OCP Best practices - Camel Quarkus - Azure Key Vault with Refresh]
 
-https://github.com/oscerd/camel-on-ocp-best-practices/tree/main/vault/azure/camel-spring-boot/retrieval-and-refresh[Camel-Spring-Boot
+https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/vault/azure/camel-spring-boot/retrieval-and-refresh[Camel-Spring-Boot
 - Camel on OCP Best practices - Camel Spring Boot - Azure Key Vault with Refresh]
 

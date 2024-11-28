@@ -90,7 +90,7 @@ You should take note of the password and use it as clientSecret parameter in the
 Now create the key vault
 
 ```
-az keyvault create --name <vaultName> --resource-group <resourceGroup>
+az keyvault create --name <vaultName> --resource-group <resourceGroup> --enable-rbac-authorization false
 ```
 
 Create a service principal associated with the application Id
@@ -114,7 +114,7 @@ az keyvault set-policy --name <vaultName> --spn <appId> --secret-permissions get
 You can create a secret through Azure CLI with the following command:
 
 ```
-az keyvault secret set --name authsecdbref --vault-name <vaultName> -f secret.json
+az keyvault secret set --name authsecdbref --vault-name <vaultName> -f postgresCreds.json
 ```
 
 Where the content of secret.json could be something like:
@@ -175,7 +175,21 @@ In the Azure portal create a shared policy for the just create eventhub resource
 
 Substitute the connection string into the application.properties.
 
-In the Azure portal, in the key vault we're using, select events and create event subscription to event grid, by selecting "event grid schema", a system topic name of your choice and the eventhub endpoint for the just created eventhub resource.
+Get back to the Azure Portal, and go to Key Vault service.
+
+Select the Key Vault just created. In the menu select "Events".
+
+Then Select the Event Hub icon.
+
+In the page that will open, define a name for the event subscription for example "keyvault-to-eh".
+
+In the System topic name field add "keyvault-to-eh-topic" for example.
+
+In the "Filter to Event Types" leave the default value of 9.
+
+In the configure endpoint section for Eventhub, in the Event Hub namespace section you should notice the namespace you've created through the AZ CLI, select that and in the Event Hub dropdown menu select the Event Hub you've created through the AZ CLI. Press confirm selection. 
+
+Leave everything as it is and press "Create".
 
 This complete the Database and secret refresh setup.
 

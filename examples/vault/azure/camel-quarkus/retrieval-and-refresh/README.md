@@ -171,9 +171,32 @@ Now create the resource
 az eventhubs eventhub create --resource-group <resourceGroup> --namespace-name <eventhub-namespace> --name <eventhub-name> --cleanup-policy Delete --partition-count 15
 ```
 
-In the Azure portal create a shared policy for the just create eventhub resource with "MANAGE" permissions and copy the connection string.
+Now we need to create a shared policy to access Event Hub.
 
-Substitute the connection string into the application.properties.
+```
+az eventhubs eventhub authorization-rule create --resource-group <resourceGroup> --namespace-name <eventhub-namespace> --eventhub-name <eventhub-name>  --name <auth_rule_name> --rights Listen Send Manage
+```
+
+Now we are ready to get the connection string
+
+```
+az eventhubs eventhub authorization-rule keys list --resource-group <resourceGroup> --namespace-name <eventhub-namespace> --eventhub-name <eventhub-name> --name <auth_rule_name>
+```
+
+This will return the following output
+
+```
+{
+  "keyName": "<auth_rule_name>",
+  "primaryConnectionString": "<primary_conn_string>",
+  "primaryKey": "<primary_key>",
+  "secondaryConnectionString": "<second_conn_string>",
+  "secondaryKey": "<secondary_key>"
+}
+
+```
+
+Substitute the connection string field with <primary_conn_string> into the application.properties.
 
 Get back to the Azure Portal, and go to Key Vault service.
 

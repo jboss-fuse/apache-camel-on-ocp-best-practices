@@ -452,7 +452,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_openshift_pipelines_config">5. OpenShift Pipelines config</a></li>
 <li><a href="#_openshift_gitops_config">6. OpenShift GitOps config</a></li>
-<li><a href="#_usefull_links">7. Usefull links</a></li>
+<li><a href="#_usefull_links">Usefull links</a></li>
 </ul>
 </div>
 </div>
@@ -507,7 +507,7 @@ Be sure to have the right permissions configured for the OpenShift GitOps users.
 <div class="title">Figure 1. Camel on Openshift CI/CD diagram</div>
 </div>
 <div class="paragraph">
-<p>The proposed architecture is to use <a href="https://catalog.redhat.com/software/container-stacks/detail/5ec54a4628834587a6b85ca5"><strong>OpenShift Pipelines</strong></a> for the CI part, to build the Camel application image, push it to an image registry and then update the repository containing the <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>OpenShift</strong></a> deployment yaml resources.</p>
+<p>The proposed architecture is to use <a href="https://catalog.redhat.com/software/container-stacks/detail/5ec54a4628834587a6b85ca5"><strong>OpenShift Pipelines</strong></a> for the CI part, to build the Camel application image, push it to an image registry and then update the repository containing the <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>OpenShift</strong></a> deployment yaml resources<a href="#approach-overview">[1]</a> <a href="#gitops-workshop">[2]</a> <a href="#gitops-demo">[3]</a>.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -537,12 +537,12 @@ The Update resources step can be performed manually (like it is assumed in the e
 <p>The CD part is managed by <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops"><strong>OpenShift GitOps</strong></a> that combining the yaml resources and the built image would deploy the Camel application in the appropriate environments (for instance dev and prod).</p>
 </div>
 <div class="paragraph">
-<p>Two repositories are provided as examples, the example app repo <a href="https://github.com/valdar/camel-cicd-exampleapp">camel-cicd-exampleapp</a> and the example gitops repo <a href="https://github.com/valdar/camel-cicd-gitops">camel-cicd-gitops</a>.</p>
+<p>Two repositories are provided as examples, the example app repo <a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/cicd/camel-cicd-exampleapp">camel-cicd-exampleapp</a> and the example gitops repo <a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/cicd/camel-cicd-gitops">camel-cicd-gitops</a>.</p>
 </div>
 <div class="sect2">
 <h3 id="_camel_cicd_exampleapp">4.1. Camel-cicd-exampleapp</h3>
 <div class="paragraph">
-<p>The camel-cicd-exampleapp repository contains a simple camel application. The maven project <a href="https://github.com/valdar/camel-cicd-exampleapp/blob/main/pom.xml#L118-L159">has been configured</a> to copy in the <code>etc/</code> folder the k8s/openshift resources generated during the build process by invoking <code>mvn clean install package</code> command. The <code>etc/</code> folder also contains the OpenShift pipelines (Tekton) definitions in the file named <code>pipeline.yaml</code> as well as an utility script (<code>cleanup-generated-kubernetes-resources.groovy)</code> useful during 8s/openshift resources generation.</p>
+<p>The camel-cicd-exampleapp repository contains a simple camel application. The maven project <a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/blob/main/examples/cicd/camel-cicd-exampleapp/pom.xml#L118-L159">has been configured</a> to copy in the <code>etc/</code> folder the k8s/openshift resources generated during the build process by invoking <code>mvn clean install package</code> command. The <code>etc/</code> folder also contains the OpenShift pipelines (Tekton) definitions in the file named <code>pipeline.yaml</code> as well as an utility script (<code>cleanup-generated-kubernetes-resources.groovy)</code> useful during 8s/openshift resources generation.</p>
 </div>
 </div>
 <div class="sect2">
@@ -558,6 +558,18 @@ The Update resources step can be performed manually (like it is assumed in the e
 <div class="sectionbody">
 <div class="paragraph">
 <p>The CI tekton pipeline can be created visually through OpenShitf console or its yaml representation can be imported and modified if/as needed. In order to do so run <code>oc apply -f camel-cicd-exampleapp/etc/pipeline.yaml</code>, then the pipeline should be visible under the pipeline tab of the developer perspective of the OpenShift console.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This example pipeline builds the camel application and then use Buildah and the project Docker file to build the container image. This is just one of the possbile ways<a href="#gitops-book">[4]</a>, the image can be build with any method that use a Dockerfile. The Docker file itselfe can be tweeked as needed.
+</td>
+</tr>
+</table>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -627,13 +639,13 @@ The Update resources step can be performed manually (like it is assumed in the e
 <p>Auto-Create Namespace: Enabled</p>
 </li>
 <li>
-<p>Repository URL: <a href="https://github.com/valdar/camel-cicd-gitops" class="bare">https://github.com/valdar/camel-cicd-gitops</a></p>
+<p>Repository URL: <a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices" class="bare">https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices</a></p>
 </li>
 <li>
 <p>Revision: main</p>
 </li>
 <li>
-<p>Path: environments/dev</p>
+<p>Path: examples/cicd/camel-cicd-gitops/environments/dev</p>
 </li>
 <li>
 <p>Cluster URL: <a href="https://kubernetes.default.svc" class="bare">https://kubernetes.default.svc</a></p>
@@ -649,18 +661,21 @@ The Update resources step can be performed manually (like it is assumed in the e
 </div>
 </div>
 <div class="sect1">
-<h2 id="_usefull_links">7. Usefull links</h2>
+<h2 id="_usefull_links">Usefull links</h2>
 <div class="sectionbody">
-<div class="ulist">
-<ul>
+<div class="ulist bibliography">
+<ul class="bibliography">
 <li>
-<p><a href="https://www.youtube.com/watch?v=6Vv9iQMggiY">General approach demoed and explained</a></p>
+<p><a id="approach-overview"></a>[1] <a href="https://www.youtube.com/watch?v=6Vv9iQMggiY">General approach demoed and explained</a></p>
 </li>
 <li>
-<p><a href="https://redhat-scholars.github.io/inner-outer-guides/inner-outer-guides/main/m1/intro.html">General approach hands one course</a></p>
+<p><a id="gitops-workshop"></a>[2] <a href="https://redhat-scholars.github.io/inner-outer-guides/inner-outer-guides/main/m1/intro.html">General approach hands one course</a></p>
 </li>
 <li>
-<p><a href="https://github.com/blues-man/vote-app-gitops?tab=readme-ov-file#openshift-gitops-demo-tekton&#8212;&#8203;argo-cd">General approach demo and course repository</a></p>
+<p><a id="gitops-demo"></a>[3] <a href="https://github.com/blues-man/vote-app-gitops?tab=readme-ov-file#openshift-gitops-demo-tekton&#8212;&#8203;argo-cd">General approach demo and course repository</a></p>
+</li>
+<li>
+<p><a id="gitops-book"></a>[4] <a href="https://developers.redhat.com/e-books/gitops-cookbook" class="bare">https://developers.redhat.com/e-books/gitops-cookbook</a></p>
 </li>
 </ul>
 </div>
@@ -669,7 +684,7 @@ The Update resources step can be performed manually (like it is assumed in the e
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-11-28 17:18:53 UTC
+Last updated 2024-11-29 16:18:31 UTC
 </div>
 </div>
 </body>

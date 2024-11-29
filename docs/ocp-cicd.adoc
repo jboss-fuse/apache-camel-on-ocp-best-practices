@@ -6,15 +6,22 @@
 :toclevels: 2
 :source-highlighter: coderay
 
+:cicd-url-ocp: https://www.redhat.com/en/technologies/cloud-computing/openshift
+:cicd-url-pipe: https://catalog.redhat.com/software/container-stacks/detail/5ec54a4628834587a6b85ca5
+:cicd-url-rmap: https://docs.openshift.com/gitops/1.14/accesscontrol_usermanagement/configuring-sso-on-argo-cd-using-dex.html#gitops-dex-role-mappings_configuring-sso-for-argo-cd-using-dex
+:cicd-url-app: https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/cicd/camel-cicd-exampleapp
+:cicd-url-gitops: https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/cicd/camel-cicd-gitops
+:cicd-url-bp: https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices
+
 == Context
 
-After having a working Camel application the next step is to deploy it in https://www.redhat.com/en/technologies/cloud-computing/openshift[**Red Hat OpenShift**] possibly in multiple environments from dev to prod. Traditionally this is referred to as CI/CD and we will explore the best practices in the context of an https://www.redhat.com/en/technologies/cloud-computing/openshift[**OpenShift**] environment.
+After having a working Camel application the next step is to deploy it in {cicd-url-ocp}[**Red Hat OpenShift**] possibly in multiple environments from dev to prod. Traditionally this is referred to as CI/CD and we will explore the best practices in the context of an {cicd-url-ocp}[**OpenShift**] environment.
 
 == Prerequisites 
 
-A https://www.redhat.com/en/technologies/cloud-computing/openshift[**Red Hat OpenShift**] cluster with https://catalog.redhat.com/software/container-stacks/detail/5ec54a4628834587a6b85ca5[**OpenShift Pipelines**] and https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops[**OpenShift GitOps**] operators installed.
+A {cicd-url-ocp}[**Red Hat OpenShift**] cluster with {cicd-url-pipe}[**OpenShift Pipelines**] and {cicd-url-ocp}/gitops[**OpenShift GitOps**] operators installed.
 
-IMPORTANT: Be sure to have the right permissions configured for the OpenShift GitOps users. In particular to which groups they belong see https://docs.openshift.com/gitops/1.14/accesscontrol_usermanagement/configuring-sso-on-argo-cd-using-dex.html#gitops-dex-role-mappings_configuring-sso-for-argo-cd-using-dex[role mapping documentation].
+IMPORTANT: Be sure to have the right permissions configured for the OpenShift GitOps users. In particular to which groups they belong see {cicd-url-rmap}[role mapping documentation].
 
 == Goal
 
@@ -26,19 +33,19 @@ IMPORTANT: Be sure to have the right permissions configured for the OpenShift Gi
 .Camel on Openshift CI/CD diagram
 image::assets/ocp-cicd_diagram.svg[Camel on Openshift CI/CD diagram]
 
-The proposed architecture is to use https://catalog.redhat.com/software/container-stacks/detail/5ec54a4628834587a6b85ca5[**OpenShift Pipelines**] for the CI part, to build the Camel application image, push it to an image registry and then update the repository containing the https://www.redhat.com/en/technologies/cloud-computing/openshift[**OpenShift**] deployment yaml resources.
+The proposed architecture is to use {cicd-url-pipe}[**OpenShift Pipelines**] for the CI part, to build the Camel application image, push it to an image registry and then update the repository containing the {cicd-url-ocp}[**OpenShift**] deployment yaml resources<<approach-overview>> <<gitops-workshop>> <<gitops-demo>>.
 
 NOTE: The Push Images step can target the internal OpenShift registry (like in the example repository of this document) or external image registries public or private.
 
 NOTE: The Update resources step can be performed manually (like it is assumed in the example repository of this document) or automated as part of the CI pipeline. The automation can be partial by just opening a PR against the Yaml git repository or it can also be automatically merged if necessary.
 
-The CD part is managed by https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops[**OpenShift GitOps**] that combining the yaml resources and the built image would deploy the Camel application in the appropriate environments (for instance dev and prod).
+The CD part is managed by {cicd-url-ocp}/gitops[**OpenShift GitOps**] that combining the yaml resources and the built image would deploy the Camel application in the appropriate environments (for instance dev and prod).
 
-Two repositories are provided as examples, the example app repo https://github.com/valdar/camel-cicd-exampleapp[camel-cicd-exampleapp] and the example gitops repo https://github.com/valdar/camel-cicd-gitops[camel-cicd-gitops].
+Two repositories are provided as examples, the example app repo {cicd-url-app}[camel-cicd-exampleapp] and the example gitops repo {cicd-url-gitops}[camel-cicd-gitops].
 
 === Camel-cicd-exampleapp
 
-The camel-cicd-exampleapp repository contains a simple camel application. The maven project https://github.com/valdar/camel-cicd-exampleapp/blob/main/pom.xml#L118-L159[has been configured] to copy in the `etc/` folder the k8s/openshift resources generated during the build process by invoking `mvn clean install package` command. The `etc/` folder also contains the OpenShift pipelines (Tekton) definitions in the file named `pipeline.yaml` as well as an utility script (`cleanup-generated-kubernetes-resources.groovy)` useful during 8s/openshift resources generation.
+The camel-cicd-exampleapp repository contains a simple camel application. The maven project https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/blob/main/examples/cicd/camel-cicd-exampleapp/pom.xml#L118-L159[has been configured] to copy in the `etc/` folder the k8s/openshift resources generated during the build process by invoking `mvn clean install package` command. The `etc/` folder also contains the OpenShift pipelines (Tekton) definitions in the file named `pipeline.yaml` as well as an utility script (`cleanup-generated-kubernetes-resources.groovy)` useful during 8s/openshift resources generation.
 
 === Camel-cicd-gitops
 
@@ -47,6 +54,8 @@ The camel-cicd-gitops project contains a typical https://kustomize.io/[kustomize
 == OpenShift Pipelines config
 
 The CI tekton pipeline can be created visually through OpenShitf console or its yaml representation can be imported and modified if/as needed. In order to do so run `oc apply -f camel-cicd-exampleapp/etc/pipeline.yaml`, then the pipeline should be visible under the pipeline tab of the developer perspective of the OpenShift console.
+
+NOTE: This example pipeline builds the camel application and then use Buildah and the project Docker file to build the container image. This is just one of the possbile ways<<gitops-book>>, the image can be build with any method that use a Dockerfile. The Docker file itselfe can be tweeked as needed.
 
 .Camel on Openshift Tekton pipeline
 image::assets/ocp-cicd_pipeline.png[Camel on Openshift Tekton pipeline]
@@ -80,16 +89,18 @@ Fill in the following information, many of which may auto-fill when selected:
 * Sync Policy: Automatic
 * Self Heal: Disabled
 * Auto-Create Namespace: Enabled
-* Repository URL: https://github.com/valdar/camel-cicd-gitops
+* Repository URL: {cicd-url-bp}
 * Revision: main
-* Path: environments/dev
+* Path: examples/cicd/camel-cicd-gitops/environments/dev
 * Cluster URL: https://kubernetes.default.svc
 * Namespace: the namespace you want the app deployied into
 
 When finished, click the CREATE button in the top left-hand corner. This will create the application in Argo CD and begin the syncing process.
 
+[bibliography]
 == Usefull links
 
-* https://www.youtube.com/watch?v=6Vv9iQMggiY[General approach demoed and explained]
-* https://redhat-scholars.github.io/inner-outer-guides/inner-outer-guides/main/m1/intro.html[General approach hands one course]
-* https://github.com/blues-man/vote-app-gitops?tab=readme-ov-file#openshift-gitops-demo-tekton--argo-cd[General approach demo and course repository]
+* [[[approach-overview,1]]] https://www.youtube.com/watch?v=6Vv9iQMggiY[General approach demoed and explained]
+* [[[gitops-workshop,2]]] https://redhat-scholars.github.io/inner-outer-guides/inner-outer-guides/main/m1/intro.html[General approach hands one course]
+* [[[gitops-demo,3]]] https://github.com/blues-man/vote-app-gitops?tab=readme-ov-file#openshift-gitops-demo-tekton--argo-cd[General approach demo and course repository]
+* [[[gitops-book,4]]] https://developers.redhat.com/e-books/gitops-cookbook 

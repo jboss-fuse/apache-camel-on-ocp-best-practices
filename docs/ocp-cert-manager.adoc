@@ -1,0 +1,78 @@
+= Using Certificates with the cert-manager Operator on OCP
+:icons: font
+:numbered:
+:title: Using Certificates with the cert-manager Operator on OCP
+:toc: left
+:toclevels: 2
+:source-highlighter: coderay
+
+== Context
+
+Certificates are an essential part of secure communication. Using the cert-manager Operator on OCP, we will show how to
+use them in Camel.
+
+== Prerequisites 
+
+A Camel integration to be deployed on https://www.redhat.com/en/technologies/cloud-computing/openshift[**OpenShift**]
+and the cert-manager Operator for Red Hat OpenShift
+https://docs.openshift.com/container-platform/latest/security/cert_manager_operator/cert-manager-operator-install.html[**installed**]
+with an Issuer configured correctly.
+
+== Goal
+
+Provide a guide on how to use generated certificates by the cert-manager Operator in Camel applications deployed on OCP.
+
+== Usage
+
+Using the https://docs.openshift.com/container-platform/latest/security/cert_manager_operator/cert-manager-creating-certificate.html[_cert-manager.io/Certificate_] object, the cert-manager will produce a secret containing the keystores and
+truststores needed to secure your Camel application. The generated secret includes the following files:
+
+* tls.crt for the certificate
+
+* tls.key for the private key
+
+* ca.crt for the CA certificate (if needed)
+
+* truststore.jks for the Trustore
+
+* keystore.jks for the Keystore
+
+Each of these can then be loaded in your Camel application either by mounting the secret as a volume in the Camel pod
+or fetch them directly in the application using the syntax
+
+....
+secret:name/key[:defaultValue]
+....
+
+Make sure the application has the appropriate rights to read Kubernetes Secrets (see our xref:ocp-secrets.adoc#_configuration[Secrets]
+guide for more information).
+
+Example certificate.yaml file:
+
+[source,yaml]
+----
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: <tls_cert>
+  namespace: <issuer_namespace>
+spec:
+  isCA: false
+  commonName: '<common_name>'
+  secretName: <secret_name>
+  dnsNames:
+  - "<domain_name>"
+  issuerRef:
+    name: <issuer_name>
+    kind: Issuer
+----
+
+For a pratical example, you can follow our examples for both the runtimes supported by Red Hat Build
+of Apache Camel. It shows how to secure communication between a client and a server using mutual TLS (mTLS) :
+
+https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/ocp/http-ssl/camel-quarkus/[Camel-Quarkus
+- Camel on OCP Best practices - Camel Quarkus - cert-manager]
+
+https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/ocp/http-ssl/camel-spring-boot/[Camel-Spring-Boot
+- Camel on OCP Best practices - Camel Spring Boot - cert-manager]
+

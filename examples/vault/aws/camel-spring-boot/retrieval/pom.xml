@@ -33,7 +33,7 @@
           <snapshots />
           <id>MRRCplugin</id>
           <name>MRRCplugin</name>
-          <url>https://maven.repository.redhat.com/ga/latest/maven/</url>
+          <url>https://maven.repository.redhat.com/ga</url>
         </pluginRepository>
       </pluginRepositories>
 

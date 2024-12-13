@@ -2,10 +2,10 @@
     from:
       uri: kamelet:postgresql-source
       parameters:
-        serverName: "{{aws:authsecdb-csb/host}}"
+        serverName: "{{aws:authsecdb/host}}"
         serverPort: 5432
-        username: "{{aws:authsecdb-csb/username}}"
-        password: "{{aws:authsecdb-csb/password}}"
+        username: "{{aws:authsecdb/username}}"
+        password: "{{aws:authsecdb/password}}"
         query: select * from test;
         databaseName: test
         delay: 5000

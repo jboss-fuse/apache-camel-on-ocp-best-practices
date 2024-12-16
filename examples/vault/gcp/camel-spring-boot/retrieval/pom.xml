@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -21,6 +21,22 @@
         </camel.springboot.kubernetes.ports.http.container-port>
         <camel.springboot.jkube.version>1.17.0</camel.springboot.jkube.version>
     </properties>
+    
+    <repositories>
+        <repository>
+          <id>MRRC</id>
+          <url>https://maven.repository.redhat.com/ga</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <releases />
+          <snapshots />
+          <id>MRRCplugin</id>
+          <name>MRRCplugin</name>
+          <url>https://maven.repository.redhat.com/ga</url>
+        </pluginRepository>
+      </pluginRepositories>
 
     <dependencyManagement>
         <dependencies>
@@ -28,7 +44,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.3.3</version>
+                <version>3.3.6</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -36,7 +52,7 @@
             <dependency>
                 <groupId>org.apache.camel.springboot</groupId>
                 <artifactId>camel-spring-boot-bom</artifactId>
-                <version>4.8.0</version>
+                <version>4.8.0.redhat-00022</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -85,7 +101,7 @@
         <dependency>
             <groupId>org.apache.camel.kamelets</groupId>
             <artifactId>camel-kamelets-utils</artifactId>
-            <version>4.8.0</version>
+            <version>4.8.0.redhat-00027</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.camel</groupId>
@@ -96,7 +112,7 @@
         <dependency>
             <groupId>org.apache.camel.kamelets</groupId>
             <artifactId>camel-kamelets</artifactId>
-            <version>4.8.0</version>
+            <version>4.8.0.redhat-00027</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -106,7 +122,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.3</version>
         </dependency>
 
         <dependency>

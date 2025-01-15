@@ -14,23 +14,39 @@
 		<maven.compiler.release>17</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<quarkus.platform.version>3.17.4</quarkus.platform.version>
+		<quarkus.platform.version>3.15.2.redhat-00003</quarkus.platform.version>
 		<groovy.version>4.0.11</groovy.version>
 
 		<surefire-plugin.version>3.1.2</surefire-plugin.version>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>MRRC</id>
+			<url>https://maven.repository.redhat.com/ga</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<releases />
+			<snapshots />
+			<id>MRRCplugin</id>
+			<name>MRRCplugin</name>
+			<url>https://maven.repository.redhat.com/ga</url>
+		</pluginRepository>
+	</pluginRepositories>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>io.quarkus.platform</groupId>
+				<groupId>com.redhat.quarkus.platform</groupId>
 				<artifactId>quarkus-bom</artifactId>
 				<version>${quarkus.platform.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>io.quarkus.platform</groupId>
+				<groupId>com.redhat.quarkus.platform</groupId>
 				<artifactId>quarkus-camel-bom</artifactId>
 				<version>${quarkus.platform.version}</version>
 				<type>pom</type>
@@ -65,7 +81,7 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>io.quarkus.platform</groupId>
+				<groupId>com.redhat.quarkus.platform</groupId>
 				<artifactId>quarkus-maven-plugin</artifactId>
 				<version>${quarkus.platform.version}</version>
 				<extensions>true</extensions>
@@ -121,7 +137,7 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>io.quarkus.platform</groupId>
+						<groupId>com.redhat.quarkus.platform</groupId>
 						<artifactId>quarkus-maven-plugin</artifactId>
 						<version>${quarkus.platform.version}</version>
 						<configuration>

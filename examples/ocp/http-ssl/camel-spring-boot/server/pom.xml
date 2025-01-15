@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.3</version>
+		<version>3.3.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
@@ -26,13 +26,29 @@
 		<jkube.enricher.jkube-openshift-route.tlsInsecureEdgeTerminationPolicy>Redirect</jkube.enricher.jkube-openshift-route.tlsInsecureEdgeTerminationPolicy>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>MRRC</id>
+			<url>https://maven.repository.redhat.com/ga</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<releases />
+			<snapshots />
+			<id>MRRCplugin</id>
+			<name>MRRCplugin</name>
+			<url>https://maven.repository.redhat.com/ga</url>
+		</pluginRepository>
+	</pluginRepositories>
+
 	<dependencyManagement>
 		<dependencies>
 			<!-- Spring Boot BOM -->
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>3.3.3</version>
+				<version>3.3.6</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -40,7 +56,7 @@
 			<dependency>
 				<groupId>org.apache.camel.springboot</groupId>
 				<artifactId>camel-spring-boot-bom</artifactId>
-				<version>4.8.0</version>
+				<version>4.8.0.redhat-00022</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

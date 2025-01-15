@@ -1,0 +1,42 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ocp-ssl-camel-server-certificate
+spec:
+  # Secret names are always required.
+  secretName: ocp-ssl-camel-server-tls
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  subject:
+    organizations:
+      - http-ssl-example
+
+  commonName: camel-http-ssl-server
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - server auth
+    - client auth
+  # At least one of a DNS Name, URI, IP address or otherName is required.
+  dnsNames:
+    - camel-http-ssl-server
+  # Issuer references are always required.
+  issuerRef:
+    name: selfsigned-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
+
+  # keystores allows adding additional output formats. This is an example for reference only.
+  keystores:
+    jks:
+      create: true
+      passwordSecretRef:
+        name: http-ssl-example-tls-password
+        key: password

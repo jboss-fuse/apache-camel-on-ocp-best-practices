@@ -29,6 +29,7 @@ A curated list of documented best practices to use Apache Camel on https://www.r
 === xref:ocp-secrets.adoc[Secrets]
 === xref:ocp-configmaps.adoc[Configmaps]
 === xref:ocp-cert-manager.adoc[Cert Manager]
+=== xref:ocp-kafka-oauth.adoc[Kafka OAuth]
 
 == Observability
 

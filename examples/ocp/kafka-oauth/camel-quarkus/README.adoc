@@ -1,0 +1,50 @@
+= Kafka client using Camel on Quarkus runtime
+:icons: font
+:numbered:
+:title: Kafka client using Camel on Quarkus runtime
+:toc: left
+:toclevels: 2
+:source-highlighter: coderay
+
+== Context
+
+The application is implemented using https://camel.apache.org/camel-quarkus/latest[Camel extensions for Quarkus] to interact with the kafka cluster, using OAuth flow with the service account to access to the cluster
+
+== Deploy the application
+
+Using `quarkus-openshift` extension it is possible to build and deploy the application as Deployment
+
+[source,shell]
+----
+./kafka-oauth/mvnw install -Dquarkus.openshift.deploy=true -f kafka-oauth/pom.xml
+----
+
+Wait until the application has been deployed `READY=1/1`
+
+[source,shell]
+```
+oc get deployment kafka-oauth --watch
+```
+
+than call the REST endpoint and verify that the log contains:
+
+[source,shell]
+```
+$ oc logs deployment/kafka-oauth
+....
+[kafka-producer] (executor-thread-1) sending message to kafka: message content
+....
+(Camel (camel-1) thread #1 - KafkaConsumer[helloWorld]) receiving message from kafka: message content
+....
+```
+
+== How it works
+
+The application is configured to inject variables using link:kafka-oauth/src/main/resources/application.properties[application properties] handled by https://quarkus.io/guides/deploying-to-openshift[`quarkus-openshift` extension] where the secret name is generated starting from the Kafka cluster name (in the example is `my-kafka`)
+The Camel component options are set by Quarkus using https://quarkus.io/guides/config-reference#environment-variables[Environment variables] mechanism, so i.e. the property https://camel.apache.org/components/latest/kafka-component.html#_component_option_sslTruststoreLocation[`sslTruststoreLocation`] will be valued from the environment variable `CAMEL_COMPONENT_KAFKA_CONFIGURATION_SSLTRUSTSTORELOCATION`
+
+
+
+
+
+

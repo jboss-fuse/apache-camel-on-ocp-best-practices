@@ -1,0 +1,50 @@
+= Kafka client using Camel on Spring Boot runtime
+:icons: font
+:numbered:
+:title: Kafka client using Camel on Spring Boot runtime
+:toc: left
+:toclevels: 2
+:source-highlighter: coderay
+
+== Context
+
+The application is implemented using Camel on Spring Boot to interact with the kafka cluster, using OAuth flow with the service account to access to the cluster
+
+== Deploy the application
+
+Using OpenShift Maven plugin it is possible to build and deploy the application as Deployment
+
+[source,shell]
+----
+mvn install -P openshift -f kafka-oauth/pom.xml
+----
+
+Wait until the application has been deployed `READY=1/1`
+
+[source,shell]
+```
+oc get deployment kafka-oauth --watch
+```
+
+than call the REST endpoint and verify that the log contains:
+
+[source,shell]
+```
+$ oc logs deployment/kafka-oauth
+....
+kafka-producer : sending message to kafka: message content
+....
+kafka-consumer : receiving message from kafka: message content
+....
+```
+
+== How it works
+
+The application is configured to inject variables using link:kafka-oauth/src/main/jkube/deployment.yaml[custom deployment] where the secret name is generated starting from the Kafka cluster name (in the example is `my-kafka`)
+The Camel properties are set by Spring Boot using https://docs.spring.io/spring-boot/reference/features/external-config.html#features.external-config.typesafe-configuration-properties.relaxed-binding.environment-variables[Binding From Environment Variables] mechanism, so i.e. the property https://camel.apache.org/components/latest/kafka-component.html#_sb_option_camel_component_kafka_ssl-truststore-location[`camel.component.kafka.ssl-truststore-location`] will be valued from the environment variable `CAMEL_COMPONENT_KAFKA_SSL-TRUSTSTORE-LOCATION`
+
+
+
+
+
+

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.23">
-<title>Camel on Openshift CI/CD</title>
+<title>Kafka OAuth with OpenShift embedded server</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -437,22 +437,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>Camel on Openshift CI/CD</h1>
+<h1>Kafka OAuth with OpenShift embedded server</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_context">1. Context</a></li>
 <li><a href="#_prerequisites">2. Prerequisites</a></li>
 <li><a href="#_goal">3. Goal</a></li>
-<li><a href="#_approach">4. Approach</a>
-<ul class="sectlevel2">
-<li><a href="#_camel_cicd_exampleapp">4.1. Camel-cicd-exampleapp</a></li>
-<li><a href="#_camel_cicd_gitops">4.2. Camel-cicd-gitops</a></li>
-</ul>
-</li>
-<li><a href="#_openshift_pipelines_config">5. OpenShift Pipelines config</a></li>
-<li><a href="#_openshift_gitops_config">6. OpenShift GitOps config</a></li>
-<li><a href="#_usefull_links">Usefull links</a></li>
+<li><a href="#_usage">4. Usage</a></li>
 </ul>
 </div>
 </div>
@@ -461,223 +453,59 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_context">1. Context</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>After having a working Camel application the next step is to deploy it in <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>Red Hat OpenShift</strong></a> possibly in multiple environments from dev to prod. Traditionally this is referred to as CI/CD and we will explore the best practices in the context of an <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>OpenShift</strong></a> environment.</p>
+<p>OAuth flow is one of the authentication methods supported by <a href="https://docs.redhat.com/en/documentation/red_hat_streams_for_apache_kafka/latest/html/deploying_and_managing_streams_for_apache_kafka_on_openshift/assembly-securing-access-str#con-securing-kafka-authentication-str">Red Hat Streams for Apache Kafka</a>, since OpenShift provides the embedded OAuth server, it could be interesting to understand how to integrate the products and how to configure a Camel application to act as a Kafka client.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_prerequisites">2. Prerequisites</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>A <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>Red Hat OpenShift</strong></a> cluster with <a href="https://catalog.redhat.com/software/container-stacks/detail/5ec54a4628834587a6b85ca5"><strong>OpenShift Pipelines</strong></a> and <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops"><strong>OpenShift GitOps</strong></a> operators installed.</p>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-Be sure to have the right permissions configured for the OpenShift GitOps users. In particular to which groups they belong see <a href="https://docs.openshift.com/gitops/1.14/accesscontrol_usermanagement/configuring-sso-on-argo-cd-using-dex.html#gitops-dex-role-mappings_configuring-sso-for-argo-cd-using-dex">role mapping documentation</a>.
-</td>
-</tr>
-</table>
+<div class="ulist">
+<ul>
+<li>
+<p>oc client <a href="https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc">installed</a> to execute remote operations.</p>
+</li>
+<li>
+<p>already logged in into <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>OpenShift</strong></a> (successfully running <em>oc login</em>)</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_goal">3. Goal</h2>
 <div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Providing best practices on OpenShift CI/CD applied to Camel applications.</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>Provide a guide on how to configure a Kafka cluster using the <code>Red Hat Streams for Apache Kafka</code> operator, and how to configure a Camel application to authenticate/authorize to the Kafka cluster using the service account, without any other credentials.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_approach">4. Approach</h2>
-<div class="sectionbody">
-<div class="imageblock">
-<div class="content">
-<img src="assets/ocp-cicd_diagram.svg" alt="Camel on Openshift CI/CD diagram">
-</div>
-<div class="title">Figure 1. Camel on Openshift CI/CD diagram</div>
-</div>
-<div class="paragraph">
-<p>The proposed architecture is to use <a href="https://catalog.redhat.com/software/container-stacks/detail/5ec54a4628834587a6b85ca5"><strong>OpenShift Pipelines</strong></a> for the CI part, to build the Camel application image, push it to an image registry and then update the repository containing the <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>OpenShift</strong></a> deployment yaml resources<a href="#approach-overview">[1]</a> <a href="#gitops-workshop">[2]</a> <a href="#gitops-demo">[3]</a>.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The Push Images step can target the internal OpenShift registry (like in the example repository of this document) or external image registries public or private.
-</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The Update resources step can be performed manually (like it is assumed in the example repository of this document) or automated as part of the CI pipeline. The automation can be partial by just opening a PR against the Yaml git repository or it can also be automatically merged if necessary.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>The CD part is managed by <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift/gitops"><strong>OpenShift GitOps</strong></a> that combining the yaml resources and the built image would deploy the Camel application in the appropriate environments (for instance dev and prod).</p>
-</div>
-<div class="paragraph">
-<p>Two repositories are provided as examples, the example app repo <a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/cicd/camel-cicd-exampleapp">camel-cicd-exampleapp</a> and the example gitops repo <a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/cicd/camel-cicd-gitops">camel-cicd-gitops</a>.</p>
-</div>
-<div class="sect2">
-<h3 id="_camel_cicd_exampleapp">4.1. Camel-cicd-exampleapp</h3>
-<div class="paragraph">
-<p>The camel-cicd-exampleapp repository contains a simple camel application. The maven project <a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/blob/main/examples/cicd/camel-cicd-exampleapp/pom.xml#L118-L159">has been configured</a> to copy in the <code>etc/</code> folder the k8s/openshift resources generated during the build process by invoking <code>mvn clean install package</code> command. The <code>etc/</code> folder also contains the OpenShift pipelines (Tekton) definitions in the file named <code>pipeline.yaml</code> as well as an utility script (<code>cleanup-generated-kubernetes-resources.groovy)</code> useful during 8s/openshift resources generation.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_camel_cicd_gitops">4.2. Camel-cicd-gitops</h3>
-<div class="paragraph">
-<p>The camel-cicd-gitops project contains a typical <a href="https://kustomize.io/">kustomize</a> structure where the k8s/openshift resources are the one generated by camel-cicd-exampleapp project and copied in the k8s`/openshift.yaml` file. Those resources are the ones used by Openshift GitOps (ArgoCD) to deploy the application.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_openshift_pipelines_config">5. OpenShift Pipelines config</h2>
+<h2 id="_usage">4. Usage</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The CI tekton pipeline can be created visually through OpenShitf console or its yaml representation can be imported and modified if/as needed. In order to do so run <code>oc apply -f camel-cicd-exampleapp/etc/pipeline.yaml</code>, then the pipeline should be visible under the pipeline tab of the developer perspective of the OpenShift console.</p>
+<p>The Kafka cluster exposes a listener that needs a valid client <code>Bearer</code> token to be authenticated, and it needs to verify it by querying the OAuth server (using <code>jwksEndpointUri</code> property). The authentication to the OAuth server is granted by the local service account token provided in the Kafka cluster pod and configured with the <code>serverBearerTokenLocation</code> property, moreover the issuer can be different (eg: in not on-prem cloud) so please configure <code>validIssuerUri</code> properly with the claim <code>iss</code> of the client token. The TLS certificates exposed by the OCP API server are validated with the CA PEM file already mounted by default in the pod, and the Kafka properties are injected as environment variable using the pod template.</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-This example pipeline builds the camel application and then use Buildah and the project Docker file to build the container image. This is just one of the possbile ways<a href="#gitops-book">[4]</a>, the image can be build with any method that use a Dockerfile. The Docker file itselfe can be tweeked as needed.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>The application, in turn, authenticates to the Kafka cluster using its service account token, configured in the <code>camel.component.kafka.sasl-jaas-config</code> property. To trust the TLS certificates of the Kafka cluster the generated secret will be mounted in the application pod and the Camel properties will be injected as an environment variable.</p>
+</div>
+<div class="paragraph">
+<p>The server finishes the login process identifying the user as defined in the property <code>userNameClaim</code>, this is the claim of the token to understand the user to be authorized.</p>
+</div>
+<div class="paragraph">
+<p>Once the authentication has been done, the Kafka cluster verifies the permissions on the resource through the KafkaUser custom resource where the name matches the authenticated username.</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="assets/ocp-cicd_pipeline.png" alt="Camel on Openshift Tekton pipeline">
+<img src="assets/ocp-kafka-integration.png" alt="overview">
 </div>
-<div class="title">Figure 2. Camel on Openshift Tekton pipeline</div>
 </div>
 <div class="paragraph">
-<p>That pipeline can be edited as needed and then started</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="assets/ocp-cicd_pipeline_start.png" alt="Starting Camel on Openshift Tekton pipeline">
-</div>
-<div class="title">Figure 3. Starting Camel on Openshift Tekton pipeline</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_openshift_gitops_config">6. OpenShift GitOps config</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Let’s use Argo CD to create a new application. You can also visit Argo CD from your OpenShift cluster. Within the Developer perspective, navigate to the openshift-gitops project, and visit the Topology page.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="assets/ocp-cicd_argocd.png" alt="Openshift GitOps project topology">
-</div>
-<div class="title">Figure 4. Openshift GitOps project topology</div>
+<p>For a practical example, you can follow our examples for both the runtimes supported by Red Hat Build
+of Apache Camel. It shows how to configure the Kafka cluster and how to deploy the Camel applications</p>
 </div>
 <div class="paragraph">
-<p>Click on the Argo CD route to visit the Argo CD dashboard. You’ll be prompted to log in to Argo CD, and you can use the Login with OpenShift button to do so.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="assets/ocp-cicd_argocd_login.png" alt="Openshift GitOps login">
-</div>
-<div class="title">Figure 5. Openshift GitOps login</div>
-</div>
-<div class="paragraph">
-<p>Within the Argo CD web console, click the \+ New App button. This will open the New Application form, where we can fill in the necessary information to create a new application in our development environment.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="assets/ocp-cicd_argocd_newapp.png" alt="Openshift GitOps New App">
-</div>
-<div class="title">Figure 6. Openshift GitOps New App</div>
-</div>
-<div class="paragraph">
-<p>Fill in the following information, many of which may auto-fill when selected:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Application Name: camel-cicd-exampleapp</p>
-</li>
-<li>
-<p>Project Name: default</p>
-</li>
-<li>
-<p>Sync Policy: Automatic</p>
-</li>
-<li>
-<p>Self Heal: Disabled</p>
-</li>
-<li>
-<p>Auto-Create Namespace: Enabled</p>
-</li>
-<li>
-<p>Repository URL: <a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices" class="bare">https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices</a></p>
-</li>
-<li>
-<p>Revision: main</p>
-</li>
-<li>
-<p>Path: examples/cicd/camel-cicd-gitops/environments/dev</p>
-</li>
-<li>
-<p>Cluster URL: <a href="https://kubernetes.default.svc" class="bare">https://kubernetes.default.svc</a></p>
-</li>
-<li>
-<p>Namespace: the namespace you want the app deployied into</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>When finished, click the CREATE button in the top left-hand corner. This will create the application in Argo CD and begin the syncing process.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_usefull_links">Usefull links</h2>
-<div class="sectionbody">
-<div class="ulist bibliography">
-<ul class="bibliography">
-<li>
-<p><a id="approach-overview"></a>[1] <a href="https://www.youtube.com/watch?v=6Vv9iQMggiY">General approach demoed and explained</a></p>
-</li>
-<li>
-<p><a id="gitops-workshop"></a>[2] <a href="https://redhat-scholars.github.io/inner-outer-guides/inner-outer-guides/main/m1/intro.html">General approach hands one course</a></p>
-</li>
-<li>
-<p><a id="gitops-demo"></a>[3] <a href="https://github.com/blues-man/vote-app-gitops?tab=readme-ov-file#openshift-gitops-demo-tekton&#8212;&#8203;argo-cd">General approach demo and course repository</a></p>
-</li>
-<li>
-<p><a id="gitops-book"></a>[4] <a href="https://developers.redhat.com/e-books/gitops-cookbook" class="bare">https://developers.redhat.com/e-books/gitops-cookbook</a></p>
-</li>
-</ul>
+<p><a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/ocp/kafka-oauth/">Camel on OCP Best practices - Kafka OAuth</a></p>
 </div>
 </div>
 </div>

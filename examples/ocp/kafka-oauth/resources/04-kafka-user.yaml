@@ -1,0 +1,28 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  labels:
+    strimzi.io/cluster: my-kafka
+  name: kafka-client-sa
+  namespace: kafka-oauth
+spec:
+  authorization:
+    type: simple
+    acls:
+      - host: '*'
+        operations:
+          - Read
+          - Describe
+          - Write
+          - Create
+        resource:
+          name: helloWorld
+          patternType: literal
+          type: topic
+      - resource:
+          type: group
+          name: '*'
+          patternType: literal
+        operations:
+          - Read
+        host: '*'

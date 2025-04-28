@@ -1,0 +1,15 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: multirole
+  labels:
+    strimzi.io/cluster: my-kafka
+  namespace: kafka-oauth
+spec:
+  roles:
+    - controller
+    - broker
+  storage:
+    type: ephemeral
+    kraftMetadata: shared
+  replicas: 1

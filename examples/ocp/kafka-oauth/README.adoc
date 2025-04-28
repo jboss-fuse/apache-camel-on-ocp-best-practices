@@ -1,0 +1,96 @@
+= Kafka OAuth with OpenShift embedded server
+:icons: font
+:numbered:
+:title: Kafka OAuth with OpenShift embedded server
+:toc: left
+:toclevels: 2
+:source-highlighter: coderay
+:ocp-project: kafka-oauth
+:kafka-cluster-name: my-kafka
+:service-account-name: kafka-client-sa
+:subscription-name: amq-streams
+
+== Context
+
+In this sample you'll use the `Streams for Apache Kafka` Operator for Red Hat OpenShift to manage the resources and deploy the Kafka cluster and its configuration including authorization.
+
+== Prerequisites
+
+- oc client https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc[installed] to execute remote operations.
+- already logged in into cluster (successfully running _oc login_)
+
+=== Preparing the project
+
+We'll connect to the `{ocp-project}` project and check the installation status. To create the project, open a terminal tab and type the following command:
+
+[source,shell,subs="attributes"]
+----
+oc new-project {ocp-project}
+----
+
+=== Install the operator in the current namespace
+
+There are two options to install the operator
+
+1. using the OperatorHub UI following the guide https://docs.redhat.com/en/documentation/red_hat_streams_for_apache_kafka/latest/html/getting_started_with_streams_for_apache_kafka_on_openshift/proc-deploying-cluster-operator-hub-str#proc-deploying-cluster-operator-hub-str[Documentation]
+2. running the installation from command line (change the namespace name in the resources in case you are using another project name)
+[source,shell]
+```
+oc apply -f ./resources/00-operator-group.yaml
+oc apply -f ./resources/01-subscription.yaml
+```
+
+To verify the installation process, wait until `PHASE=Succeeded`
+
+[source,shell,subs="attributes"]
+----
+oc get ClusterServiceVersion -n {ocp-project} --watch
+----
+
+=== Deploy Kafka cluster
+
+Deploy the kafka cluster with OAuth2 configuration using https://docs.redhat.com/en/documentation/red_hat_streams_for_apache_kafka/latest/html/deploying_and_managing_streams_for_apache_kafka_on_openshift/assembly-oauth-security-str#con-oauth-authentication-broker-str[OCP API server as authorization server] and https://docs.redhat.com/en/documentation/red_hat_streams_for_apache_kafka/latest/html/deploying_and_managing_streams_for_apache_kafka_on_openshift/assembly-kraft-mode-str#assembly-kraft-mode-str[KRaft] (change the namespace name in the resources in case you are using another project name)
+
+[source,shell]
+```
+oc apply -f ./resources/02-nodepool.yaml
+oc apply -f ./resources/03-kafka-cluster.yaml
+```
+
+Create the Kafka User to handle ACLs for service accounts (the name of the `KafkaUser` must match the service account name used by the client applications)
+
+[source,shell]
+----
+oc apply -f ./resources/04-kafka-user.yaml
+----
+
+Wait then until the status of the cluster has `READY=True`:
+
+[source,shell,subs="attributes"]
+```
+oc get kafka.kafka.strimzi.io/{kafka-cluster-name} -n {ocp-project} --watch
+```
+
+=== Create the service account used by the application
+
+In order to match the kafka user name with the service account name, you need to create the service account
+
+[source,shell,subs="attributes"]
+```
+oc create sa {service-account-name} -n {ocp-project}
+```
+
+== Deploy the application
+
+There are two implementations in two different runtimes, so you can pick the one you want to deploy following the proper guide
+
+1. link:camel-quarkus/README.adoc[using Quarkus runtime]
+2. link:camel-spring-boot/README.adoc[using Spring Boot runtime]
+
+Once the application has been deployed, you can start sending messages to the Kafka cluster using the exposed REST API:
+
+```
+curl -X POST "http://$(oc get route kafka-oauth -o go-template --template='{{.spec.host}}')/api/kafka?id=1" -d "message content" -H "Content-type: text/plain"
+```
+
+then verify the log contains the messages from both producer and consumer Camel routes

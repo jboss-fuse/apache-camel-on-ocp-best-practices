@@ -12,7 +12,7 @@ Kubernetes ConfigMaps are usually used to store configuration data, such as envi
 
 == Prerequisites 
 
-A camel integrationt o be deployed on https://www.redhat.com/en/technologies/cloud-computing/openshift[**OpenShift**].
+A camel integration to be deployed on https://www.redhat.com/en/technologies/cloud-computing/openshift[**OpenShift**].
 
 == Goal
 

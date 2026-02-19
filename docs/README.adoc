@@ -34,3 +34,4 @@ A curated list of documented best practices to use Apache Camel on https://www.r
 == Observability
 
 === xref:camel-on-ocp-observability.adoc[OCP Observability]
+=== xref:camel-dashboard.adoc[Camel Dashboard]

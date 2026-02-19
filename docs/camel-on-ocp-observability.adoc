@@ -83,7 +83,7 @@ In September will be released the new stack for logging that supports Loki+OpenT
 Guide to installing OpenShift Logging collector + Loki as storage https://docs.google.com/document/d/1INyTh-YJmvnZGcjaEbr9rAmrTyj2ohFCFAPJwSzt4Zo[OCP logging with Lokistack] as a current alternative to OpenTelemetry
 
 [bibliography]
-= Appendix
+== Appendix
 
 * [[[ocp-observability,1]]] https://www.redhat.com/en/technologies/cloud-computing/openshift/observability, https://docs.openshift.com/container-platform/4.16/observability/index.html
 * [[[otel,2]]] https://opentelemetry.io/ 

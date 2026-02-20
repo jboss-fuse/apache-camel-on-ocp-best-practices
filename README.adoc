@@ -39,4 +39,4 @@ Start from copying `template.adoc` file in `docs/` folder and rename it as neede
 === xref:new-guide.adoc[My new guide!]
 [...]
 ....
-If your guid needs examples or examples projects you can put them into `examples/` folder and reference them accordingly.
+If your guide needs examples or examples projects you can put them into `examples/` folder and reference them accordingly.

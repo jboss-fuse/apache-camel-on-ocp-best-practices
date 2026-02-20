@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.26">
-<title>Using Certificates with the cert-manager Operator on OCP</title>
+<title>Best practice document for Camel Dashboard on OCP</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -526,14 +526,32 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>Using Certificates with the cert-manager Operator on OCP</h1>
+<h1>Camel on OCP Best Practices - Camel Dashboard</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_context">1. Context</a></li>
-<li><a href="#_prerequisites">2. Prerequisites</a></li>
-<li><a href="#_goal">3. Goal</a></li>
-<li><a href="#_usage">4. Usage</a></li>
+<li><a href="#_camel_dashboard_components">2. Camel Dashboard Components</a></li>
+<li><a href="#_prerequisites">3. Prerequisites</a></li>
+<li><a href="#_installation">4. Installation</a>
+<ul class="sectlevel2">
+<li><a href="#_selective_component_installation">4.1. Selective Component Installation</a></li>
+</ul>
+</li>
+<li><a href="#_preparing_camel_applications">5. Preparing Camel Applications</a>
+<ul class="sectlevel2">
+<li><a href="#_adding_observability_services">5.1. Adding Observability Services</a></li>
+<li><a href="#_configuring_for_camel_dashboard_discovery">5.2. Configuring for Camel Dashboard Discovery</a></li>
+</ul>
+</li>
+<li><a href="#_using_the_camel_dashboard">6. Using the Camel Dashboard</a></li>
+<li><a href="#_troubleshooting">7. Troubleshooting</a>
+<ul class="sectlevel2">
+<li><a href="#_applications_not_appearing_in_dashboard">7.1. Applications Not Appearing in Dashboard</a></li>
+<li><a href="#_permission_issues">7.2. Permission Issues</a></li>
+</ul>
+</li>
+<li><a href="#_appendix">Appendix</a></li>
 </ul>
 </div>
 </div>
@@ -542,104 +560,306 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <h2 id="_context">1. Context</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Certificates are an essential part of secure communication. Using the cert-manager Operator on OCP, we will show how to
-use them in Camel.</p>
+<p>The <a href="https://camel-tooling.github.io/camel-dashboard/">Camel Dashboard</a> <a href="#camel-dashboard">[1]</a> is a Kubernetes-native tool designed to monitor and manage fleets of Apache Camel applications running on OpenShift. Born as a spin-off of Camel K, it provides a simple, low-resource solution for visualizing the health and performance of your Camel applications across your cluster.</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_prerequisites">2. Prerequisites</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p>A Camel integration to be deployed on <a href="https://www.redhat.com/en/technologies/cloud-computing/openshift"><strong>OpenShift</strong></a>
-and the cert-manager Operator for Red Hat OpenShift
-<a href="https://docs.openshift.com/container-platform/latest/security/cert_manager_operator/cert-manager-operator-install.html"><strong>installed</strong></a>
-with an Issuer configured correctly.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_goal">3. Goal</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Provide a guide on how to use generated certificates by the cert-manager Operator in Camel applications deployed on OCP.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_usage">4. Usage</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Using the <a href="https://docs.openshift.com/container-platform/latest/security/cert_manager_operator/cert-manager-creating-certificate.html"><em>cert-manager.io/Certificate</em></a> object, the cert-manager will produce a secret containing the keystores and
-truststores needed to secure your Camel application. The generated secret includes the following files:</p>
+<p>The dashboard collects key performance indicators (KPIs) such as:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>tls.crt for the certificate</p>
+<p>Number of messages exchanged</p>
 </li>
 <li>
-<p>tls.key for the private key</p>
+<p>Success rates and failure counts</p>
 </li>
 <li>
-<p>ca.crt for the CA certificate (if needed)</p>
+<p>Current in-flight message status</p>
 </li>
 <li>
-<p>truststore.jks for the Trustore</p>
-</li>
-<li>
-<p>keystore.jks for the Keystore</p>
+<p>Route health and performance metrics</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Each of these can then be loaded in your Camel application either by mounting the secret as a volume in the Camel pod
-or fetch them directly in the application using the syntax</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>secret:name/key[:defaultValue]</pre>
+<p>This enables real-time operational insights and proactive management of your Camel integration applications.</p>
 </div>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_camel_dashboard_components">2. Camel Dashboard Components</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>Make sure the application has the appropriate rights to read Kubernetes Secrets (see our <a href="ocp-secrets.html#_configuration">Secrets</a>
-guide for more information).</p>
+<p>The Camel Dashboard is composed of three main components, all installable via a single Helm chart:</p>
 </div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Camel Dashboard Operator</strong>: Manages Camel Dashboard instances and discovers Camel applications</p>
+</li>
+<li>
+<p><strong>Camel Dashboard Console</strong>: OpenShift Console plugin providing integrated UI within the OCP web console</p>
+</li>
+<li>
+<p><strong>Hawtio Online Console Plugin</strong>: Management and monitoring console for deep-dive Java application debugging</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites">3. Prerequisites</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>OpenShift 4.19 or higher</p>
+</li>
+<li>
+<p>Apache Camel 4.9 or higher for full observability support</p>
+</li>
+<li>
+<p>Helm 3.x installed</p>
+</li>
+<li>
+<p>cluster-admin privileges for installation</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installation">4. Installation</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>Example certificate.yaml file:</p>
+<p>The recommended approach is to use the unified Helm chart that deploys all components:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="yaml"><span class="key">apiVersion</span>: <span class="string"><span class="content">cert-manager.io/v1</span></span>
-<span class="key">kind</span>: <span class="string"><span class="content">Certificate</span></span>
+<pre class="CodeRay highlight"><code data-lang="bash"># Add the Camel Dashboard Helm repository
+helm repo add camel-dashboard https://camel-tooling.github.io/camel-dashboard/charts
+
+# Install all components in the camel-dashboard namespace
+helm install camel-dashboard-openshift-all \
+  camel-dashboard/camel-dashboard-openshift-all \
+  --version 4.19.0 \
+  -n camel-dashboard \
+  --create-namespace</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The Helm chart version follows OpenShift versioning (X.Y.Z is compatible with OpenShift X.Y). Always use the latest patch version for your OpenShift release.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_selective_component_installation">4.1. Selective Component Installation</h3>
+<div class="paragraph">
+<p>If you want to install only specific components:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash"># Install without Hawtio
+helm install camel-dashboard-openshift-all \
+  camel-dashboard/camel-dashboard-openshift-all \
+  --version 4.19.0 \
+  -n camel-dashboard \
+  --create-namespace \
+  --set hawtio-online-console-plugin.enabled=false
+
+# Install only the operator
+helm install camel-dashboard-openshift-all \
+  camel-dashboard/camel-dashboard-openshift-all \
+  --version 4.19.0 \
+  -n camel-dashboard \
+  --create-namespace \
+  --set camel-dashboard-console.enabled=false \
+  --set hawtio-online-console-plugin.enabled=false</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_preparing_camel_applications">5. Preparing Camel Applications</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For the Camel Dashboard to discover and monitor your applications, they must:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Use Camel 4.9 or higher</p>
+</li>
+<li>
+<p>Include the Camel Observability Services component</p>
+</li>
+<li>
+<p>Have proper labels and annotations configured</p>
+</li>
+</ol>
+</div>
+<div class="sect2">
+<h3 id="_adding_observability_services">5.1. Adding Observability Services</h3>
+<div class="sect3">
+<h4 id="_camel_quarkus">5.1.1. Camel Quarkus</h4>
+<div class="paragraph">
+<p>Add the observability services extension to your <code>pom.xml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependency&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span>org.apache.camel.quarkus<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>camel-quarkus-observability-services<span class="tag">&lt;/artifactId&gt;</span>
+<span class="tag">&lt;/dependency&gt;</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_camel_spring_boot">5.1.2. Camel Spring Boot</h4>
+<div class="paragraph">
+<p>Add the observability services starter:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;dependency&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span>org.apache.camel.springboot<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>camel-observability-services-starter<span class="tag">&lt;/artifactId&gt;</span>
+<span class="tag">&lt;/dependency&gt;</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_camel_jbang">5.1.3. Camel JBang</h4>
+<div class="paragraph">
+<p>Run with the <code>--observe</code> option:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">camel run MyRoute.java --observe</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuring_for_camel_dashboard_discovery">5.2. Configuring for Camel Dashboard Discovery</h3>
+<div class="paragraph">
+<p>You will need to add add the required Kubernetes label to your Deployment manifest for the Camel Dashboard to discover your application:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span class="key">apiVersion</span>: <span class="string"><span class="content">apps/v1</span></span>
+<span class="key">kind</span>: <span class="string"><span class="content">Deployment</span></span>
 <span class="key">metadata</span>:
-  <span class="key">name</span>: <span class="string"><span class="content">&lt;tls_cert&gt;</span></span>
-  <span class="key">namespace</span>: <span class="string"><span class="content">&lt;issuer_namespace&gt;</span></span>
-<span class="key">spec</span>:
-  <span class="key">isCA</span>: <span class="string"><span class="content">false</span></span>
-  <span class="key">commonName</span>: <span class="string"><span class="content">'&lt;common_name&gt;'</span></span>
-  <span class="key">secretName</span>: <span class="string"><span class="content">&lt;secret_name&gt;</span></span>
-  <span class="key">dnsNames</span>:
-  - <span class="string"><span class="delimiter">&quot;</span><span class="content">&lt;domain_name&gt;</span><span class="delimiter">&quot;</span></span>
-  <span class="key">issuerRef</span>:
-    <span class="key">name</span>: <span class="string"><span class="content">&lt;issuer_name&gt;</span></span>
-    <span class="key">kind</span>: <span class="string"><span class="content">Issuer</span></span></code></pre>
+  <span class="key">labels</span>:
+    <span class="key">app</span>: <span class="string"><span class="content">my-camel-app</span></span>
+    <span class="key">camel.apache.org/app</span>: <span class="string"><span class="content">my-camel-app</span></span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>For the case to protect HTTPS endpoints with a Certificate, you can annotate an <code>Ingress</code> resource with cert-manager that will trigger the creation of an Certificate (so you don&#8217;t have to create it) and associate it to the HTTPS endpoint.</p>
+<p>For Camel versions older than 4.12, you must also configure the observability services port with the label: "camel.apache.org/observability-services-port: 8080"</p>
 </div>
 <div class="paragraph">
-<p>For a pratical example, you can follow our examples for both the runtimes supported by Red Hat Build
-of Apache Camel. It shows how to secure communication between a client and a server using mutual TLS (mTLS) :</p>
+<p>You can find more advanced configuration for some fine tuning in the <a href="https://camel-tooling.github.io/camel-dashboard/docs/user-guide/">User Guide</a> <a href="#camel-dashboard-user-guide">[2]</a></p>
 </div>
-<div class="paragraph">
-<p><a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/ocp/http-ssl/camel-quarkus/">Camel-Quarkus
-- Camel on OCP Best practices - Camel Quarkus - cert-manager</a></p>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_the_camel_dashboard">6. Using the Camel Dashboard</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p><a href="https://github.com/jboss-fuse/apache-camel-on-ocp-best-practices/tree/main/examples/ocp/http-ssl/camel-spring-boot/">Camel-Spring-Boot
-- Camel on OCP Best practices - Camel Spring Boot - cert-manager</a></p>
+<p>After installation and application deployment:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Navigate to the OpenShift Console</p>
+</li>
+<li>
+<p>Look for the "Camel" section in the left navigation menu section "Workloads"</p>
+</li>
+<li>
+<p>Access the Camel Dashboard to view your fleet of applications</p>
+</li>
+</ol>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/ocp-camel-dashboard-list.png" alt="Camel Fleet on Openshift">
+</div>
+<div class="title">Figure 1. Camel Fleet on Openshift</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/ocp-camel-dashboard-detail.png" alt="Camel Application detail on Openshift">
+</div>
+<div class="title">Figure 2. Camel Application detail on Openshift</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_troubleshooting">7. Troubleshooting</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_applications_not_appearing_in_dashboard">7.1. Applications Not Appearing in Dashboard</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Verify the <code>camel.apache.org/app</code> label is present on the deployment</p>
+</li>
+<li>
+<p>Check that Camel Observability Services is included in dependencies</p>
+</li>
+<li>
+<p>Ensure observability endpoints are accessible (default port 9876)</p>
+</li>
+<li>
+<p>Verify the application is running and healthy</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_permission_issues">7.2. Permission Issues</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Check that users have appropriate RBAC permissions</p>
+</li>
+<li>
+<p>Verify the console plugin is properly enabled in OpenShift</p>
+</li>
+<li>
+<p>Review operator logs for discovery errors</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_appendix">Appendix</h2>
+<div class="sectionbody">
+<div class="ulist bibliography">
+<ul class="bibliography">
+<li>
+<p><a id="camel-dashboard"></a>[1] <a href="https://camel-tooling.github.io/camel-dashboard/" class="bare">https://camel-tooling.github.io/camel-dashboard/</a></p>
+</li>
+<li>
+<p><a id="camel-dashboard-user-guide"></a>[2]<a href="https://camel-tooling.github.io/camel-dashboard/docs/user-guide/" class="bare">https://camel-tooling.github.io/camel-dashboard/docs/user-guide/</a></p>
+</li>
+<li>
+<p><a id="camel-observability-services"></a>[3] <a href="https://camel.apache.org/components/next/others/observability-services.html" class="bare">https://camel.apache.org/components/next/others/observability-services.html</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>

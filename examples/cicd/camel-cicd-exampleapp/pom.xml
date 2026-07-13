@@ -15,7 +15,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.group-id>com.redhat.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.15.2.redhat-00003</quarkus.platform.version>
+        <quarkus.platform.version>3.33.2.redhat-00002</quarkus.platform.version>
         <groovy.version>4.0.11</groovy.version>
 
         <skipITs>true</skipITs>
